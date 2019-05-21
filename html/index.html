@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Gravity</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <style>
+      body{
+        padding: 0;
+        margin: 0;
+        background-color: #000;
+        background-image: url("background.jpg");
+        background-size: cover;
+      }
+      .assets>img{
+        width: 0px;
+        height: 0px;
+      }
+      div.space{
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        /* overflow: hidden; */
+        transform: scaleY(-1) translate(50%, 50%);
+      }
+      div.mass{
+        position: absolute;
+        width: 100px;
+        height: 100px;
+        left: -50px;
+        top: -50px;
+        background-size: cover;
+        background-color: #fff;
+        border-radius: 50%;
+        transform: scaleY(-1);
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="space"></div>
+    <!-- images -->
+    <div class="assets">
+      <img id="asteroid1" src="img/asteroid1.png">
+      <img id="asteroid2" src="img/asteroid2.png">
+      <img id="asteroid3" src="img/asteroid3.png">
+      <img id="jovian1" src="img/jovian1.png">
+      <img id="jovian2" src="img/jovian2.png">
+      <img id="jovian3" src="img/jovian3.png">
+    </div>
+    <script src="gravity.js"></script>
+  </body>
+</html>
