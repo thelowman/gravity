@@ -41,9 +41,6 @@ resize();
 function distance(obj1, obj2){
   let dx = obj2.x - obj1.x;
   let dy = obj2.y - obj1.y;
-  // console.log('delta x: ' + dx);
-  // console.log('delta y: ' + dy);
-  // console.log('distance: ' + Math.sqrt((dx * dx) + (dy * dy)));
   return Math.sqrt((dx * dx) + (dy * dy));
 }
 
@@ -84,27 +81,27 @@ function mass(){
     ctx.stroke();
 
     // draw max influence
-    // ctx.beginPath();
-    // ctx.arc(this.x, this.y, Math.floor(this.mass), 0, Math.PI * 2, true);
-    // if(this.underInfluence) ctx.strokeStyle = '#ff0';
-    // else ctx.strokeStyle = '#0ff';
-    // ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, Math.floor(this.mass), 0, Math.PI * 2, true);
+    if(this.underInfluence) ctx.strokeStyle = '#ff0';
+    else ctx.strokeStyle = '#0ff';
+    ctx.stroke();
 
     // coordinates (upside down)
-    // ctx.beginPath();
-    // ctx.fillText(this.mass.toFixed(0), this.x, this.y);
-    // ctx.fillStyle = '#fff';
-    // ctx.stroke();
+    ctx.beginPath();
+    ctx.fillText(this.mass.toFixed(0), this.x, this.y);
+    ctx.fillStyle = '#fff';
+    ctx.stroke();
 
     // motion vector
-    // ctx.beginPath();
-    // ctx.moveTo(this.x, this.y);
-    // ctx.lineTo(
-    //   this.x + (Math.sin(this.angle) * this.velocity * 4),
-    //   this.y + (Math.cos(this.angle) * this.velocity * 4)
-    // );
-    // ctx.strokeStyle = '#f00';
-    // ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(this.x, this.y);
+    ctx.lineTo(
+      this.x + (Math.sin(this.angle) * this.velocity * 4),
+      this.y + (Math.cos(this.angle) * this.velocity * 4)
+    );
+    ctx.strokeStyle = '#f00';
+    ctx.stroke();
     this.underInfluence = false;
   }
 }
@@ -120,9 +117,9 @@ for(let i = 0; i < numObjects; i++){
 
 
 const update = (time) => {
-  ctx.drawImage(background, minMaxX * -1, minMaxY * -1);
-  // ctx.rect(minMaxX * -1, minMaxY * -1, elem.width, elem.height);
-  // ctx.fill();
+  // ctx.drawImage(background, minMaxX * -1, minMaxY * -1);
+  ctx.rect(minMaxX * -1, minMaxY * -1, elem.width, elem.height);
+  ctx.fill();
 
   // update all positions
   for(let i = 0; i < spaceObjects.length; i++)
