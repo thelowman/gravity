@@ -21,6 +21,10 @@ const resize = () => {
 window.onresize = resize;
 resize();
 
+document.body.addEventListener('keypress', e => {
+  console.log('key');
+});
+
 
 
 
@@ -39,14 +43,14 @@ const distance = (a, b) => {
   let dy = b.y - a.y;
   return Math.sqrt((dx * dx) + (dy * dy));
 }
-const angle = (a, b) => Math.atan2(b.y - a.y, b.x - b.x);
+const angle = (a, b) => Math.atan2(b.y - a.y, b.x - a.x);
 const attraction = (a, b) => {
   const d = distance(a, b);
   return (a.mass * b.mass) / (d * d);
 }
 const vToP = (ang, mag) => ({
   x: mag * Math.cos(ang),
-  y: mag * Math.cos(ang)
+  y: mag * Math.sin(ang)
 });
 
 
@@ -62,8 +66,8 @@ const calcG = m => things.reduce((g, t) => {
 
 
 
+ctx.fillStyle = '#333';
 const render = () => {
-  ctx.fillStyle = '#333';
   ctx.fillRect(minMaxX * -1, minMaxY * -1, minMaxX * 2, minMaxY * 2);
 
   let g;
@@ -78,30 +82,8 @@ const render = () => {
     ctx.moveTo(things[i].x, things[i].y);
     ctx.lineTo(things[i].x + g.x, things[i].y + g.y);
     ctx.stroke();
+    // console.log(g);
   }
-
-  // test calculations
-  ctx.strokeStyle = '#f00';
-  for(let i = 0; i < testObs.length; i++) {
-    ctx.beginPath();
-    ctx.arc(testObs[i].x, testObs[i].y, Math.floor(testObs[i].mass / 10), 0, Math.PI * 2, true);
-    ctx.stroke();
-
-    g = calcG(testObs[i]);
-    ctx.beginPath();
-    ctx.moveTo(testObs[i].x, testObs[i].y);
-    ctx.lineTo(testObs[i].x + g.x, testObs[i].y + g.y);
-    ctx.stroke();
-  }
-  // ctx.beginPath();
-  // ctx.arc(0, 0, 5, 0, Math.PI * 2, true);
-  // ctx.stroke();
-
-  // let oi = vToP(Math.PI, 20);
-  // ctx.beginPath();
-  // ctx.moveTo(0,0);
-  // ctx.lineTo(oi.x, oi.y);
-  // ctx.stroke();
 }
 
 
@@ -117,14 +99,14 @@ const testObs = [
   },
   {
     x: 20,
-    y: 20,
+    y: 0,
     mass: 50
   }
 ]
 
 
 // make some stuff
-const numObjects = 5;
+const numObjects = 500;
 let things = [];
 for(let i = 0; i < numObjects; i++) things.push(mass());
 render();
