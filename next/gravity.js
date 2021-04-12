@@ -33,10 +33,8 @@ const mass = () => ({
   x: canvasWidth / 2 - Math.random() * canvasWidth,
   y: canvasHeight / 2 - Math.random() * canvasHeight,
   mass: Math.random() * 100,
-  angle: 0,
-  velocity: 0
-  // angle: Math.random() * 2 * Math.PI,
-  // velocity: Math.random() * 5
+  velocity: 0,
+  g: { x: 0, y: 0 }
 });
 const distance = (a, b) => {
   let dx = b.x - a.x;
@@ -64,6 +62,11 @@ const calcG = m => things.reduce((g, t) => {
 }, { x:0, y:0 });
 
 
+const update = () => {
+  for(let i = 0; i < things.length; i++) {
+    things[i].g = calcG(things[i]);
+  }
+}
 
 
 ctx.fillStyle = '#333';
@@ -77,12 +80,10 @@ const render = () => {
     ctx.arc(things[i].x, things[i].y, Math.floor(things[i].mass / 10), 0, Math.PI * 2, true);
     ctx.stroke();
 
-    g = calcG(things[i]);
     ctx.beginPath();
     ctx.moveTo(things[i].x, things[i].y);
-    ctx.lineTo(things[i].x + g.x, things[i].y + g.y);
+    ctx.lineTo(things[i].x + things[i].g.x, things[i].y + things[i].g.y);
     ctx.stroke();
-    // console.log(g);
   }
 }
 
@@ -109,4 +110,5 @@ const testObs = [
 const numObjects = 500;
 let things = [];
 for(let i = 0; i < numObjects; i++) things.push(mass());
+update();
 render();
