@@ -9,8 +9,8 @@ const resize = () => {
   // decrease the size to prevent scroll bars
   canvasWidth = window.innerWidth - 2;
   canvasHeight = window.innerHeight - 4;
-  minMaxX = canvasWidth / 2;
-  minMaxY = canvasHeight / 2;
+  minMaxX = canvasWidth / 2 + 1;
+  minMaxY = canvasHeight / 2 + 1;
 
   canvas.width = canvasWidth;
   canvas.height = canvasHeight;
@@ -26,7 +26,8 @@ resize();
 
 
 /** Random mass generator. */
-const mass = () => ({
+const mass = (i) => ({
+  i,
   x: canvasWidth / 2 - Math.random() * canvasWidth,
   y: canvasHeight / 2 - Math.random() * canvasHeight,
   mass: Math.random() * 100,
@@ -41,8 +42,7 @@ const distance = (a, b) => {
 const angle = (a, b) => Math.atan2(b.y - a.y, b.x - a.x);
 const attraction = (a, b) => {
   const d = distance(a, b);
-  if (d < a.mass || d < b.mass) console.log(a, b, d);
-  return (a.mass * b.mass) / (d * d);
+  return { d, f: (a.mass * b.mass) / (d * d) }
 }
 const vToP = (ang, mag) => ({
   x: mag * Math.cos(ang),
@@ -52,7 +52,9 @@ const vToP = (ang, mag) => ({
 
 const calcG = m => things.reduce((g, t) => {
   if (t !== m) { // exclude itself
-    const v = vToP(angle(m, t), attraction(m, t));
+    const a = attraction(m, t);
+    const v = vToP(angle(m, t), a.f);
+
     g.x += v.x;
     g.y += v.y;
   }
@@ -60,7 +62,10 @@ const calcG = m => things.reduce((g, t) => {
 }, { x:0, y:0 });
 
 
+let collisions = [];
 const update = () => {
+  // handle collisions
+  // move objects
   for(let i = 0; i < things.length; i++) {
     things[i].x += things[i].v.x;
     things[i].y += things[i].v.y;
@@ -69,11 +74,14 @@ const update = () => {
     if (things[i].y > minMaxY) things[i].y = things[i].y + minMaxY * -2;
     if (things[i].y < minMaxY * -1) things[i].y = things[i].y + minMaxY * 2;
   }
+  // prepare for the next round
+  collisions = [];
   for(let i = 0; i < things.length; i++) {
     things[i].g = calcG(things[i]);
-    things[i].v.x += things[i].g.x / 10;
-    things[i].v.y += things[i].g.y / 10;
+    things[i].v.x += things[i].g.x / 100;
+    things[i].v.y += things[i].g.y / 100;
   }
+  console.log(collisions);
 }
 
 
@@ -81,7 +89,7 @@ const update = () => {
 ctx.font = '14px sans-serif';
 const render = () => {
   ctx.fillStyle = '#333';
-  ctx.fillRect(minMaxX * -1, minMaxY * -1, minMaxX * 2 + 1, minMaxY * 2 + 1);
+  ctx.fillRect(minMaxX * -1, minMaxY * -1, minMaxX * 2, minMaxY * 2);
 
   let g;
   //ctx.strokeStyle = '#fff';
@@ -129,7 +137,7 @@ const testObs = [
 // make some stuff
 const numObjects = 50;
 let things = [];
-for(let i = 0; i < numObjects; i++) things.push(mass());
+for(let i = 0; i < numObjects; i++) things.push(mass(i));
 update();
 render();
 document.body.addEventListener('keypress', e => {
