@@ -52,9 +52,8 @@ const vToP = (ang, mag) => ({
 
 const calcG = m => things.reduce((g, t) => {
   if (t !== m) { // exclude itself
-    const a = attraction(m, t);
+    const a = attraction(m, t); // returns d (dist) and f (force)
     const v = vToP(angle(m, t), a.f);
-
     g.x += v.x;
     g.y += v.y;
   }
