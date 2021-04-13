@@ -61,24 +61,27 @@ const calcG = m => things.reduce((g, t) => {
 
 const update = () => {
   for(let i = 0; i < things.length; i++) {
+    things[i].x += things[i].v.x;
+    things[i].y += things[i].v.y;
+  }
+  for(let i = 0; i < things.length; i++) {
     things[i].g = calcG(things[i]);
     things[i].v.x += things[i].g.x / 10;
     things[i].v.y += things[i].g.y / 10;
   }
-  for(let i = 0; i < things.length; i++) {
-    things[i].x += things[i].v.x;
-    things[i].y += things[i].v.y;
-  }
 }
 
 
-ctx.fillStyle = '#333';
+//ctx.fillStyle = '#333';
+ctx.font = '14px sans-serif';
 const render = () => {
+  ctx.fillStyle = '#333';
   ctx.fillRect(minMaxX * -1, minMaxY * -1, minMaxX * 2, minMaxY * 2);
 
   let g;
-  ctx.strokeStyle = '#fff';
+  //ctx.strokeStyle = '#fff';
   for(let i = 0; i < things.length; i++) {
+    ctx.strokeStyle = '#fff';
     ctx.beginPath();
     ctx.arc(things[i].x, things[i].y, Math.floor(things[i].mass / 10), 0, Math.PI * 2, true);
     ctx.stroke();
@@ -87,6 +90,15 @@ const render = () => {
     ctx.moveTo(things[i].x, things[i].y);
     ctx.lineTo(things[i].x + things[i].g.x, things[i].y + things[i].g.y);
     ctx.stroke();
+
+    ctx.strokeStyle = '#ff0';
+    ctx.beginPath();
+    ctx.moveTo(things[i].x, things[i].y);
+    ctx.lineTo(things[i].x + things[i].v.x, things[i].y + things[i].v.y);
+    ctx.stroke();
+
+    ctx.fillStyle = '#ff0';
+    ctx.fillText(i, things[i].x, things[i].y);
   }
 }
 
