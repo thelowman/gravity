@@ -21,9 +21,6 @@ const resize = () => {
 window.onresize = resize;
 resize();
 
-document.body.addEventListener('keypress', e => {
-  console.log('key');
-});
 
 
 
@@ -33,7 +30,7 @@ const mass = () => ({
   x: canvasWidth / 2 - Math.random() * canvasWidth,
   y: canvasHeight / 2 - Math.random() * canvasHeight,
   mass: Math.random() * 100,
-  velocity: 0,
+  v: { x: 0, y: 0 },
   g: { x: 0, y: 0 }
 });
 const distance = (a, b) => {
@@ -65,6 +62,12 @@ const calcG = m => things.reduce((g, t) => {
 const update = () => {
   for(let i = 0; i < things.length; i++) {
     things[i].g = calcG(things[i]);
+    things[i].v.x += things[i].g.x / 10;
+    things[i].v.y += things[i].g.y / 10;
+  }
+  for(let i = 0; i < things.length; i++) {
+    things[i].x += things[i].v.x;
+    things[i].y += things[i].v.y;
   }
 }
 
@@ -107,8 +110,12 @@ const testObs = [
 
 
 // make some stuff
-const numObjects = 500;
+const numObjects = 50;
 let things = [];
 for(let i = 0; i < numObjects; i++) things.push(mass());
 update();
 render();
+document.body.addEventListener('keypress', e => {
+  update();
+  render();
+});
