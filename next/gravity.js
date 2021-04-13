@@ -41,6 +41,7 @@ const distance = (a, b) => {
 const angle = (a, b) => Math.atan2(b.y - a.y, b.x - a.x);
 const attraction = (a, b) => {
   const d = distance(a, b);
+  if (d < a.mass || d < b.mass) console.log(a, b, d);
   return (a.mass * b.mass) / (d * d);
 }
 const vToP = (ang, mag) => ({
@@ -63,6 +64,10 @@ const update = () => {
   for(let i = 0; i < things.length; i++) {
     things[i].x += things[i].v.x;
     things[i].y += things[i].v.y;
+    if (things[i].x > minMaxX) things[i].x = things[i].x + minMaxX * -2;
+    if (things[i].x < minMaxX * -1) things[i].x = things[i].x + minMaxX * 2;
+    if (things[i].y > minMaxY) things[i].y = things[i].y + minMaxY * -2;
+    if (things[i].y < minMaxY * -1) things[i].y = things[i].y + minMaxY * 2;
   }
   for(let i = 0; i < things.length; i++) {
     things[i].g = calcG(things[i]);
@@ -76,7 +81,7 @@ const update = () => {
 ctx.font = '14px sans-serif';
 const render = () => {
   ctx.fillStyle = '#333';
-  ctx.fillRect(minMaxX * -1, minMaxY * -1, minMaxX * 2, minMaxY * 2);
+  ctx.fillRect(minMaxX * -1, minMaxY * -1, minMaxX * 2 + 1, minMaxY * 2 + 1);
 
   let g;
   //ctx.strokeStyle = '#fff';
