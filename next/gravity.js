@@ -48,8 +48,15 @@ const vToP = (ang, mag) => ({
   x: mag * Math.cos(ang),
   y: mag * Math.sin(ang)
 });
+// these 2 functions are temporary for debugging
+const byDist = thing => things.filter(t => distance(t, thing) < 200);
+const byAttr = thing => things.filter(t => {
+  const a = attraction(t, thing);
+  return a.d < a.f;
+});
 
-
+// consider this a replacement for calcG
+const cg2 = (a, b) => vToP(angle(a, b), attraction(a, b).f; 
 const calcG = m => things.reduce((g, t) => {
   if (t !== m) { // exclude itself
     const a = attraction(m, t); // returns d (dist) and f (force)
@@ -74,13 +81,11 @@ const update = () => {
     if (things[i].y < minMaxY * -1) things[i].y = things[i].y + minMaxY * 2;
   }
   // prepare for the next round
-  collisions = [];
-  for(let i = 0; i < things.length; i++) {
+  collisions = things.reduce((coll, thing) => {
     things[i].g = calcG(things[i]);
     things[i].v.x += things[i].g.x / 100;
     things[i].v.y += things[i].g.y / 100;
-  }
-  console.log(collisions);
+  }, []);
 }
 
 
