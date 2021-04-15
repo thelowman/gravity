@@ -40,9 +40,10 @@ const distance = (a, b) => {
   return Math.sqrt((dx * dx) + (dy * dy));
 }
 const angle = (a, b) => Math.atan2(b.y - a.y, b.x - a.x);
-const attraction = (a, b) => {
+/** Calculates the distance and attraction between masses. */
+const dist_attr = (a, b) => {
   const d = distance(a, b);
-  return { d, f: (a.mass * b.mass) / (d * d) }
+  return { d, a: (a.mass * b.mass) / (d * d) }
 }
 const vToP = (ang, mag) => ({
   x: mag * Math.cos(ang),
@@ -51,24 +52,24 @@ const vToP = (ang, mag) => ({
 // these 2 functions are temporary for debugging
 const byDist = thing => things.filter(t => distance(t, thing) < 200);
 const byAttr = thing => things.filter(t => {
-  const a = attraction(t, thing);
-  return a.d < a.f;
+  const a = dist_attr(t, thing);
+  return a.d < a.a;
 });
 
 // consider this a replacement for calcG
-const cg2 = (a, b) => vToP(angle(a, b), attraction(a, b).f; 
+const cg2 = (a, b) => vToP(angle(a, b), dist_attr(a, b).a);
 const calcG = m => things.reduce((g, t) => {
   if (t !== m) { // exclude itself
-    const a = attraction(m, t); // returns d (dist) and f (force)
-    const v = vToP(angle(m, t), a.f);
+    const a = dist_attr(m, t);
+    const v = vToP(angle(m, t), a.a);
     g.x += v.x;
     g.y += v.y;
   }
   return g;
 }, { x:0, y:0 });
 
+// const checkNear = (a, b)
 
-let collisions = [];
 const update = () => {
   // handle collisions
   // move objects
@@ -82,9 +83,9 @@ const update = () => {
   }
   // prepare for the next round
   collisions = things.reduce((coll, thing) => {
-    things[i].g = calcG(things[i]);
-    things[i].v.x += things[i].g.x / 100;
-    things[i].v.y += things[i].g.y / 100;
+    thing.g = calcG(thing);
+    thing.v.x += thing.g.x / 100;
+    thing.v.y += thing.g.y / 100;
   }, []);
 }
 
