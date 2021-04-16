@@ -1,3 +1,6 @@
+const numObjects = 50;
+auto = true;
+
 let canvasWidth,
     canvasHeight,
     minMaxX,
@@ -34,44 +37,65 @@ const mass = (i) => ({
   v: { x: 0, y: 0 },
   g: { x: 0, y: 0 }
 });
+const reindex = () => {
+  for(let i = 0; i < things.length; i++) things[i].i = i;
+}
+/** Distance between 2 points. */
 const distance = (a, b) => {
   let dx = b.x - a.x;
   let dy = b.y - a.y;
   return Math.sqrt((dx * dx) + (dy * dy));
 }
+/** Agngle between 2 points (radians). */
 const angle = (a, b) => Math.atan2(b.y - a.y, b.x - a.x);
-/** Calculates the distance and attraction between masses. */
-const dist_attr = (a, b) => {
-  const d = distance(a, b);
-  return { d, a: (a.mass * b.mass) / (d * d) }
-}
+/** Simple gravitational attraction calculation. */
+const attraction = (a, b, d) => (a.mass * b.mass) / (d * d);
+/** Vector to point. */
 const vToP = (ang, mag) => ({
   x: mag * Math.cos(ang),
   y: mag * Math.sin(ang)
 });
-// these 2 functions are temporary for debugging
-const byDist = thing => things.filter(t => distance(t, thing) < 200);
-const byAttr = thing => things.filter(t => {
-  const a = dist_attr(t, thing);
-  return a.d < a.a;
-});
 
-// consider this a replacement for calcG
-const cg2 = (a, b) => vToP(angle(a, b), dist_attr(a, b).a);
-const calcG = m => things.reduce((g, t) => {
-  if (t !== m) { // exclude itself
-    const a = dist_attr(m, t);
-    const v = vToP(angle(m, t), a.a);
-    g.x += v.x;
-    g.y += v.y;
+const calcG = a => things.reduce((g, b) => {
+  if (a !== b) { // exclude itself
+    const dist = distance(a, b);
+    const attr = attraction(a, b, dist);
+    const pt = vToP(angle(a, b), attr);
+    g.x += pt.x;
+    g.y += pt.y;
+    if (g.nearest.thing == null || g.nearest.dist > dist) {
+      g.nearest.thing = b;
+      g.nearest.dist = dist;
+      g.nearest.attr = attr;
+    }
   }
   return g;
-}, { x:0, y:0 });
+}, {
+  x:0,
+  y:0,
+  nearest: {
+    thing: null,
+    dist: 0,
+    attr: 0
+  }
+});
 
-// const checkNear = (a, b)
-
+let collisions = [];
 const update = () => {
   // handle collisions
+  for (let i = 0; i < collisions.length; i++) {
+    let a = collisions[i].a;
+    let b = collisions[i].b;
+
+    a.mass += b.mass;
+    let pos = vToP(angle(a, b), distance(a, b));
+    a.x += pos.x / 2;
+    a.y += pos.y / 2;
+    a.v.x = ((a.v.x * a.mass) + (b.v.x * b.mass)) / a.mass;
+    a.v.y = ((a.v.y * a.mass) + (b.v.y * b.mass)) / a.mass;
+    things.splice(b.i, 1);
+    reindex();
+  }
   // move objects
   for(let i = 0; i < things.length; i++) {
     things[i].x += things[i].v.x;
@@ -84,9 +108,17 @@ const update = () => {
   // prepare for the next round
   collisions = things.reduce((coll, thing) => {
     thing.g = calcG(thing);
-    thing.v.x += thing.g.x / 100;
-    thing.v.y += thing.g.y / 100;
+    if (thing.g.nearest.thing && thing.g.nearest.attr > thing.g.nearest.dist * 10) {
+      if (!coll.find(c => c.a === thing || c.b === thing))
+        coll.push({ a: thing, b: thing.g.nearest.thing});
+    }
+    else {
+      thing.v.x += thing.g.x / 100;
+      thing.v.y += thing.g.y / 100;
+    }
+    return coll;
   }, []);
+  requestAnimationFrame(render);
 }
 
 
@@ -123,29 +155,9 @@ const render = () => {
 
 
 
-
-// test objects
-const testObs = [
-  {
-    x: 0,
-    y: 0,
-    mass: 50
-  },
-  {
-    x: 20,
-    y: 0,
-    mass: 50
-  }
-]
-
-
 // make some stuff
-const numObjects = 50;
 let things = [];
 for(let i = 0; i < numObjects; i++) things.push(mass(i));
 update();
-render();
-document.body.addEventListener('keypress', e => {
-  update();
-  render();
-});
+if (auto) setInterval(update, 10);
+else document.body.addEventListener('keypress', e => update());
