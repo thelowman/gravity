@@ -1,4 +1,4 @@
-const numObjects = 50;
+const numObjects = 500;
 auto = true;
 
 let canvasWidth,
@@ -12,13 +12,13 @@ const resize = () => {
   // decrease the size to prevent scroll bars
   canvasWidth = window.innerWidth - 2;
   canvasHeight = window.innerHeight - 4;
-  minMaxX = canvasWidth / 2 + 1;
-  minMaxY = canvasHeight / 2 + 1;
+  minMaxX = canvasWidth + 1;
+  minMaxY = canvasHeight + 1;
 
   canvas.width = canvasWidth;
   canvas.height = canvasHeight;
   ctx.resetTransform();
-  ctx.translate(Math.floor(minMaxX) - 1, Math.floor(minMaxY) - 1);
+  ctx.translate(Math.floor(minMaxX) - minMaxX / 2, Math.floor(minMaxY) - minMaxY / 2);
   ctx.scale(1, -1);
 }
 window.onresize = resize;
@@ -31,8 +31,8 @@ resize();
 /** Random mass generator. */
 const mass = (i) => ({
   i,
-  x: canvasWidth / 2 - Math.random() * canvasWidth,
-  y: canvasHeight / 2 - Math.random() * canvasHeight,
+  x: Math.random() * minMaxX * 2 - minMaxX,
+  y: Math.random() * minMaxY * 2 - minMaxY,
   mass: Math.random() * 100,
   v: { x: 0, y: 0 },
   g: { x: 0, y: 0 }
@@ -113,8 +113,8 @@ const update = () => {
         coll.push({ a: thing, b: thing.g.nearest.thing});
     }
     else {
-      thing.v.x += thing.g.x / 100;
-      thing.v.y += thing.g.y / 100;
+      thing.v.x += thing.g.x / (thing.mass * 10);
+      thing.v.y += thing.g.y / (thing.mass * 10);
     }
     return coll;
   }, []);
@@ -136,10 +136,10 @@ const render = () => {
     ctx.arc(things[i].x, things[i].y, Math.floor(things[i].mass / 10), 0, Math.PI * 2, true);
     ctx.stroke();
 
-    ctx.beginPath();
-    ctx.moveTo(things[i].x, things[i].y);
-    ctx.lineTo(things[i].x + things[i].g.x, things[i].y + things[i].g.y);
-    ctx.stroke();
+    // ctx.beginPath();
+    // ctx.moveTo(things[i].x, things[i].y);
+    // ctx.lineTo(things[i].x + things[i].g.x, things[i].y + things[i].g.y);
+    // ctx.stroke();
 
     ctx.strokeStyle = '#ff0';
     ctx.beginPath();
