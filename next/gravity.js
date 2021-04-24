@@ -1,4 +1,4 @@
-const numObjects = 500;
+const numObjects = 150;
 auto = true;
 
 let canvasWidth,
@@ -87,12 +87,17 @@ const update = () => {
     let a = collisions[i].a;
     let b = collisions[i].b;
 
-    a.mass += b.mass;
     let pos = vToP(angle(a, b), distance(a, b));
     a.x += pos.x / 2;
     a.y += pos.y / 2;
-    a.v.x = ((a.v.x * a.mass) + (b.v.x * b.mass)) / a.mass;
-    a.v.y = ((a.v.y * a.mass) + (b.v.y * b.mass)) / a.mass;
+
+    let ratio = a.mass / b.mass;
+    let am = ratio > 1 ? 1 - (1 / ratio) : ratio;
+    let bm = ratio > 1 ? 1 / ratio : 1 - ratio;
+    a.v.x = (a.v.x * am) + (b.v.x * bm);
+    a.v.y = (a.v.y * am) + (b.v.y * bm);
+
+    a.mass += b.mass;
     things.splice(b.i, 1);
     reindex();
   }
@@ -131,7 +136,10 @@ const render = () => {
   let g;
   //ctx.strokeStyle = '#fff';
   for(let i = 0; i < things.length; i++) {
-    ctx.strokeStyle = '#fff';
+
+    if (things[i].mass < 1000) ctx.strokeStyle = '#fff';
+    else if (things[i].mass < 2000) ctx.strokeStyle = '#ff0';
+    else ctx.strokeStyle = '#f00';
     ctx.beginPath();
     ctx.arc(things[i].x, things[i].y, Math.floor(things[i].mass / 10), 0, Math.PI * 2, true);
     ctx.stroke();
