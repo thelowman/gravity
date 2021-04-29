@@ -1,4 +1,4 @@
-const numObjects = 150;
+const numObjects = 1000; // 150 is a good number
 auto = true;
 
 let canvasWidth,
@@ -55,7 +55,7 @@ const vToP = (ang, mag) => ({
   x: mag * Math.cos(ang),
   y: mag * Math.sin(ang)
 });
-
+/** Roughly calculates the G-force on one object. */
 const calcG = a => things.reduce((g, b) => {
   if (a !== b) { // exclude itself
     const dist = distance(a, b);
@@ -79,6 +79,31 @@ const calcG = a => things.reduce((g, b) => {
     attr: 0
   }
 });
+/** Blow stuff up if it gets too heavy. */
+const explode = thing => {
+  let mass = thing.mass;
+  let part = 0;
+  let masses = [];
+  while(part < mass) {
+    part = Math.random() * .35 * thing.mass;
+    masses.push(part);
+    mass -= part;
+  }
+  const angleInc = Math.PI * 2 / masses.length;
+  let nextAngle = angleInc;
+  for(let i = 0; i < masses.length; i++) {
+    const exMove = vToP(nextAngle, 10);
+    nextAngle += angleInc;
+    things.push({
+      i: 0,
+      x: thing.x,
+      y: thing.y,
+      mass: masses[i],
+      v: { x: exMove.x + thing.v.x, y: exMove.y + thing.v.y },
+      g: { x: 0, y: 0 }
+    });
+  }
+}
 
 let collisions = [];
 const update = () => {
@@ -99,6 +124,11 @@ const update = () => {
 
     a.mass += b.mass;
     things.splice(b.i, 1);
+    // explode is NOT ready yet
+    // if (a.mass > 3500) {
+    //   things.splice(a.i, 1);
+    //   explode(a);
+    // }
     reindex();
   }
   // move objects
@@ -166,6 +196,8 @@ const render = () => {
 // make some stuff
 let things = [];
 for(let i = 0; i < numObjects; i++) things.push(mass(i));
+
+
 update();
 if (auto) setInterval(update, 10);
 else document.body.addEventListener('keypress', e => update());
