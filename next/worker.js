@@ -25,6 +25,8 @@ const vToP = (ang, mag) => ({
   x: mag * Math.cos(ang),
   y: mag * Math.sin(ang)
 });
+
+
 /** Roughly calculates the G-force on one object. */
 const calcG = a => things.reduce((g, b) => {
   if (a !== b) { // exclude itself
@@ -50,8 +52,10 @@ const calcG = a => things.reduce((g, b) => {
   }
 });
 
+
 let collisions = [];
 const update = () => {
+  let start = performance.now();
   // handle collisions
   for (let i = 0; i < collisions.length; i++) {
     let a = collisions[i].a;
@@ -81,6 +85,13 @@ const update = () => {
     if (things[i].y < minMaxY * -1) things[i].y = things[i].y + minMaxY * 2;
   }
   // prepare for the next round
+  // // this version prevents collisions
+  // for(let i = 0; i < things.length; i++) {
+  //   things[i].g = calcG(things[i]);
+  //   things[i].v.x += things[i].g.x / (things[i].mass * 10);
+  //   things[i].v.y += things[i].g.y / (things[i].mass * 10);
+  // }
+  // this version produces collisions
   collisions = things.reduce((coll, thing) => {
     thing.g = calcG(thing);
     if (thing.g.nearest.thing && thing.g.nearest.attr > thing.g.nearest.dist * 10) {
@@ -93,7 +104,10 @@ const update = () => {
     }
     return coll;
   }, []);
-  postMessage(things);
+  postMessage({
+    things,
+    time: performance.now() - start
+  });
 }
 
 

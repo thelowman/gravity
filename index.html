@@ -16,4 +16,16 @@
     <a href="next/index.html">New New Version</a>
   </div>
 
+  <script>
+    // some crude tests to get a sense of the time required
+    const test = {
+      atan2: () => {
+        const start = performance.now();
+        for(let i = 0; i < 1000000; i++) {
+          Math.atan2(1, i / 100);
+        }
+        console.log(performance.now() - start);
+      }
+    }
+  </script>
 </body>
