@@ -1,9 +1,20 @@
+const dtor = d => d * Math.PI / 180;
+const rtod = r => r * 180 / Math.PI;
+/** sine lookup */
+let sine = [];
+for(let i = 0; i < 361; i++) sine.push(Math.sin(dtor(i)));
+/** cosine lookup */
+let cosine = [];
+for(let i = 0; i < 361; i++) cosine.push(Math.cos(dtor(i)));
+/** atan2 lookup */
+
+
 /** Random mass generator. */
 const mass = (i) => ({
   i,
   x: Math.random() * minMaxX * 2 - minMaxX,
   y: Math.random() * minMaxY * 2 - minMaxY,
-  mass: Math.random() * 100,
+  mass: Math.random() * 50, //100,
   v: { x: 0, y: 0 },
   g: { x: 0, y: 0 }
 });
@@ -13,7 +24,7 @@ const reindex = () => {
 /** Distance between 2 points. */
 const distance = (a, b) => {
   let dx = b.x - a.x;
-  let dy = b.y - a.y;
+  let dy = b.y - a.y;  
   return Math.sqrt((dx * dx) + (dy * dy));
 }
 /** Agngle between 2 points (radians). */
@@ -24,6 +35,8 @@ const attraction = (a, b, d) => (a.mass * b.mass) / (d * d);
 const vToP = (ang, mag) => ({
   x: mag * Math.cos(ang),
   y: mag * Math.sin(ang)
+  // x: ang > 0 ? mag * cosine[Math.round(rtod(ang))] : mag * cosine[Math.round(360 + rtod(ang))],
+  // y: ang > 0 ? mag * sine[Math.round(rtod(ang))] : mag * sine[Math.round(360 + rtod(ang))]
 });
 
 
@@ -54,6 +67,7 @@ const calcG = a => things.reduce((g, b) => {
 
 
 let collisions = [];
+let longestDuration = 0;
 const update = () => {
   let start = performance.now();
   // handle collisions
@@ -61,9 +75,13 @@ const update = () => {
     let a = collisions[i].a;
     let b = collisions[i].b;
 
-    let pos = vToP(angle(a, b), distance(a, b));
-    a.x += pos.x / 2;
-    a.y += pos.y / 2;
+    // let pos = vToP(angle(a, b), distance(a, b));
+    if (a.mass < b.mass) {
+      a.x = b.x;
+      a.y = b.y;
+    }
+    // a.x += pos.x / 2;
+    // a.y += pos.y / 2;
 
     let ratio = a.mass / b.mass;
     let am = ratio > 1 ? 1 - (1 / ratio) : ratio;
@@ -104,16 +122,19 @@ const update = () => {
     }
     return coll;
   }, []);
+
+  let tmp = performance.now() - start;
+  if (tmp > longestDuration) longestDuration = tmp;
   postMessage({
     things,
-    time: performance.now() - start
+    time: tmp //performance.now() - start
   });
 }
 
 
 let things = [];
 let minMaxX, minMaxY;
-setInterval(update, 10);
+setInterval(update, 33);
 
 onmessage = e => {
   minMaxX = e.data.minMaxX;

@@ -1,4 +1,4 @@
-const numObjects = 150; // 150 is a good number, 330 is about max (on my computer)
+const numObjects = 500; // 150 is a good number, 330 is about max (on my computer)
 auto = true;
 let canvasWidth,
     canvasHeight
