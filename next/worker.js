@@ -1,7 +1,7 @@
 /** Milliseconds between frames. */
 const targetFrameInterval = 33;
 /** Inital number of objects. */
-const initialObjects = 150;
+let numObjects;
 /** Minimum/maximum values for x. */
 let minMaxX;
 /** Minimum/maximum values for y. */
@@ -81,7 +81,13 @@ const calcG = things => a => things.reduce((g, b) => {
 
 
 let collisions = [];
+let updating = false;
 const update = things => {
+  if (updating) {
+    console.log('[dropped frame]');
+    return;
+  }
+  updating = true;
   let start = performance.now();
   // handle collisions
   for (let i = 0; i < collisions.length; i++) {
@@ -113,17 +119,13 @@ const update = things => {
     if (things[i].y < minMaxY * -1) things[i].y = things[i].y + minMaxY * 2;
   }
   const gForce = calcG(things);
-  // prepare for the next round
-  // // this version prevents collisions
-  // for(let i = 0; i < things.length; i++) {
-  //   things[i].g = gForce(things[i]);
-  //   things[i].v.x += things[i].g.x / (things[i].mass * 10);
-  //   things[i].v.y += things[i].g.y / (things[i].mass * 10);
-  // }
-  // this version produces collisions
   collisions = things.reduce((coll, thing) => {
     thing.g = gForce(thing);
-    if (thing.g.nearest.thing && thing.g.nearest.attr > thing.g.nearest.dist * 10) {
+    if (
+      thing.g.nearest.thing && (
+        thing.g.nearest.dist < 4 ||
+        thing.g.nearest.attr > thing.g.nearest.dist * 20
+      )) {
       if (!coll.find(c => c.a === thing || c.b === thing))
         coll.push({ a: thing, b: thing.g.nearest.thing});
     }
@@ -135,13 +137,14 @@ const update = things => {
   }, []);
 
   let time = performance.now() - start;
+  updating = false;
   return { things, time };
 }
 
 
 const play = () => {
   let things = [];
-  for(let i = 0; i < initialObjects; i++) things.push(mass(i));
+  for(let i = 0; i < numObjects; i++) things.push(mass(i));
 
   let interval = null;
   const stop = () => {
@@ -157,10 +160,20 @@ const play = () => {
   return { stop, resume }
 }
 
+let control;
 onmessage = e => {
   if (e.data.params) {
     minMaxX = e.data.params.minMaxX;
     minMaxY = e.data.params.minMaxY;
-    play();
+    numObjects = e.data.params.numObjects;
+    control = play();
+  }
+  if (e.data.cmd && control) {
+    if (e.data.cmd === 'stop') control.stop();
+    if (e.data.cmd === 'resume') control.resume();
+    if (e.data.cmd === 'restart') {
+      control.stop();
+      control = play();
+    }
   }
 }

@@ -1,7 +1,9 @@
 let canvasWidth,
-    canvasHeight;
-const minMaxX = 1000;
-const minMaxY = 1000;
+    canvasHeight,
+    minMaxX,
+    minMaxY;
+// const minMaxX = 1000;
+// const minMaxY = 1000;
 
 const canvas = document.body.appendChild(document.createElement('canvas'));
 const ctx = canvas.getContext('2d');
@@ -13,9 +15,12 @@ const resize = () => {
   canvas.width = canvasWidth;
   canvas.height = canvasHeight;
 
-  const scale = canvasWidth > canvasHeight ?
-    canvasWidth / minMaxX * 1.5 :
-    canvasHeight / minMaxY * 1.5;
+  minMaxX = canvasWidth * .75;
+  minMaxY = canvasHeight * .75;
+  const scale = 1;
+  // const scale = canvasWidth > canvasHeight ?
+  //   canvasWidth / minMaxX * 1.5 :
+  //   canvasHeight / minMaxY * 1.5;
 
   ctx.resetTransform();
   ctx.translate(Math.floor(canvasWidth / 2), Math.floor(canvasHeight / 2));
@@ -24,6 +29,18 @@ const resize = () => {
 resize();
 
 
+const objectType = mass => {
+  if (mass < 150)  return { d: mass / 12, c: '#666' }; // rock
+  if (mass < 700)  return { d: mass / 15, c: '#aaa' }; // planetoid
+  if (mass < 800)  return { d: mass / 18, c: '#bbb' }; // small planet
+  if (mass < 900)  return { d: mass / 20, c: '#00f' }; // earthy
+  if (mass < 1200) return { d: mass / 25, c: '#0f0' }; // jovian
+  if (mass < 1500) return { d: mass / 30, c: '#ff0' }; // sun
+  if (mass < 2000) return { d: mass / 40, c: '#f00' }; // red giant
+  if (mass < 2500) return { d: mass / 50, c: '#fff' }; // neutron star
+  return { d: mass / 100, c: '#000' } // black hole
+}
+
 
 //ctx.fillStyle = '#333';
 ctx.font = '10px sans-serif';
@@ -31,16 +48,23 @@ const render = (things, time) => {
   ctx.fillStyle = '#333';
   ctx.fillRect(minMaxX * -1, minMaxY * -1, minMaxX * 2, minMaxY * 2);
 
-  let g;
+  let g, m;
   //ctx.strokeStyle = '#fff';
   for(let i = 0; i < things.length; i++) {
 
-    if (things[i].mass < 1000) ctx.strokeStyle = '#fff';
-    else if (things[i].mass < 2000) ctx.strokeStyle = '#ff0';
-    else ctx.strokeStyle = '#f00';
+    m = objectType(things[i].mass);
+    ctx.fillStyle = m.c;
     ctx.beginPath();
-    ctx.arc(things[i].x, things[i].y, Math.floor(things[i].mass / 10), 0, Math.PI * 2, true);
-    ctx.stroke();
+    ctx.arc(things[i].x, things[i].y, m.d, 0, Math.PI * 2, true);
+    ctx.fill();
+
+    // original drawing
+    // if (things[i].mass < 1000) ctx.strokeStyle = '#fff';
+    // else if (things[i].mass < 2000) ctx.strokeStyle = '#ff0';
+    // else ctx.strokeStyle = '#f00';
+    // ctx.beginPath();
+    // ctx.arc(things[i].x, things[i].y, Math.floor(things[i].mass / 10), 0, Math.PI * 2, true);
+    // ctx.stroke();
 
     // ctx.beginPath();
     // ctx.moveTo(things[i].x, things[i].y);
@@ -70,23 +94,41 @@ const render = (things, time) => {
     // ctx.lineTo(-100, -100);
     // ctx.stroke();
 
-    // Indexes
-    // ctx.fillStyle = '#ff0';
-    // ctx.fillText(i, things[i].x, things[i].y);
-
-    if (time) {
-      // text is upside down due to scaling
-      ctx.fillStyle = '#ff0';
-      ctx.fillText(time, 0, 0);
-    }
+    // if (time) {
+    //   // text is upside down due to scaling
+    //   ctx.fillStyle = '#ff0';
+    //   ctx.fillText(time, 0, 0);
+    // }
   }
 }
 
 const worker = new Worker('worker.js');
 worker.onmessage = e => {
+  e.data.things.sort((a, b) => a.mass > b.mass ? -1 : a.mass < b.mass ? 1 : 0);
   requestAnimationFrame(() => render(e.data.things, e.data.time));
+  if (e.data.things.length < 20) worker.postMessage({ cmd: 'restart' });
 }
-worker.postMessage({ params: { minMaxX, minMaxY } });
+worker.postMessage({ params: { minMaxX, minMaxY, numObjects: 500 } });
+
+
+// MDN - https://developer.mozilla.org/en-US/docs/Web/API/Page_Visibility_API
+// Set the name of the hidden property and the change event for visibility
+let hidden, visibilityChange;
+if (typeof document.hidden !== "undefined") { // Opera 12.10 and Firefox 18 and later support
+  hidden = "hidden";
+  visibilityChange = "visibilitychange";
+} else if (typeof document.msHidden !== "undefined") {
+  hidden = "msHidden";
+  visibilityChange = "msvisibilitychange";
+} else if (typeof document.webkitHidden !== "undefined") {
+  hidden = "webkitHidden";
+  visibilityChange = "webkitvisibilitychange";
+}
+function handleVisibilityChange() {
+  if (document[hidden]) worker.postMessage({ cmd: 'stop' });
+  else worker.postMessage({ cmd: 'resume'});
+}
+document.addEventListener(visibilityChange, handleVisibilityChange, false);
 
 
 
