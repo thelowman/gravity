@@ -1,5 +1,19 @@
+/** Milliseconds between frames. */
+const targetFrameInterval = 33;
+/** Inital number of objects. */
+const initialObjects = 150;
+/** Minimum/maximum values for x. */
+let minMaxX;
+/** Minimum/maximum values for y. */
+let minMaxY;
+
+
+/** degrees to radians */
 const dtor = d => d * Math.PI / 180;
+/** radians to degrees */
 const rtod = r => r * 180 / Math.PI;
+
+// EXPERIMENTAL
 /** sine lookup */
 let sine = [];
 for(let i = 0; i < 361; i++) sine.push(Math.sin(dtor(i)));
@@ -7,18 +21,18 @@ for(let i = 0; i < 361; i++) sine.push(Math.sin(dtor(i)));
 let cosine = [];
 for(let i = 0; i < 361; i++) cosine.push(Math.cos(dtor(i)));
 /** atan2 lookup */
-
+// ???????
 
 /** Random mass generator. */
 const mass = (i) => ({
   i,
   x: Math.random() * minMaxX * 2 - minMaxX,
   y: Math.random() * minMaxY * 2 - minMaxY,
-  mass: Math.random() * 50, //100,
+  mass: Math.random() * 50,
   v: { x: 0, y: 0 },
   g: { x: 0, y: 0 }
 });
-const reindex = () => {
+const reindex = things => {
   for(let i = 0; i < things.length; i++) things[i].i = i;
 }
 /** Distance between 2 points. */
@@ -41,7 +55,7 @@ const vToP = (ang, mag) => ({
 
 
 /** Roughly calculates the G-force on one object. */
-const calcG = a => things.reduce((g, b) => {
+const calcG = things => a => things.reduce((g, b) => {
   if (a !== b) { // exclude itself
     const dist = distance(a, b);
     const attr = attraction(a, b, dist);
@@ -67,21 +81,17 @@ const calcG = a => things.reduce((g, b) => {
 
 
 let collisions = [];
-let longestDuration = 0;
-const update = () => {
+const update = things => {
   let start = performance.now();
   // handle collisions
   for (let i = 0; i < collisions.length; i++) {
     let a = collisions[i].a;
     let b = collisions[i].b;
 
-    // let pos = vToP(angle(a, b), distance(a, b));
     if (a.mass < b.mass) {
       a.x = b.x;
       a.y = b.y;
     }
-    // a.x += pos.x / 2;
-    // a.y += pos.y / 2;
 
     let ratio = a.mass / b.mass;
     let am = ratio > 1 ? 1 - (1 / ratio) : ratio;
@@ -91,7 +101,7 @@ const update = () => {
 
     a.mass += b.mass;
     things.splice(b.i, 1);
-    reindex();
+    reindex(things);
   }
   // move objects
   for(let i = 0; i < things.length; i++) {
@@ -102,16 +112,17 @@ const update = () => {
     if (things[i].y > minMaxY) things[i].y = things[i].y + minMaxY * -2;
     if (things[i].y < minMaxY * -1) things[i].y = things[i].y + minMaxY * 2;
   }
+  const gForce = calcG(things);
   // prepare for the next round
   // // this version prevents collisions
   // for(let i = 0; i < things.length; i++) {
-  //   things[i].g = calcG(things[i]);
+  //   things[i].g = gForce(things[i]);
   //   things[i].v.x += things[i].g.x / (things[i].mass * 10);
   //   things[i].v.y += things[i].g.y / (things[i].mass * 10);
   // }
   // this version produces collisions
   collisions = things.reduce((coll, thing) => {
-    thing.g = calcG(thing);
+    thing.g = gForce(thing);
     if (thing.g.nearest.thing && thing.g.nearest.attr > thing.g.nearest.dist * 10) {
       if (!coll.find(c => c.a === thing || c.b === thing))
         coll.push({ a: thing, b: thing.g.nearest.thing});
@@ -123,22 +134,33 @@ const update = () => {
     return coll;
   }, []);
 
-  let tmp = performance.now() - start;
-  if (tmp > longestDuration) longestDuration = tmp;
-  postMessage({
-    things,
-    time: tmp //performance.now() - start
-  });
+  let time = performance.now() - start;
+  return { things, time };
 }
 
 
-let things = [];
-let minMaxX, minMaxY;
-setInterval(update, 33);
+const play = () => {
+  let things = [];
+  for(let i = 0; i < initialObjects; i++) things.push(mass(i));
+
+  let interval = null;
+  const stop = () => {
+    if (interval) {
+      clearInterval(interval);
+      interval = null;
+    }
+  }
+  const resume = () => {
+    interval = setInterval(() => postMessage(update(things)), targetFrameInterval);
+  }
+  resume();
+  return { stop, resume }
+}
 
 onmessage = e => {
-  minMaxX = e.data.minMaxX;
-  minMaxY = e.data.minMaxY;
-  for(let i = 0; i < e.data.things; i++) things.push(mass(i));
-  update();
+  if (e.data.params) {
+    minMaxX = e.data.params.minMaxX;
+    minMaxY = e.data.params.minMaxY;
+    play();
+  }
 }

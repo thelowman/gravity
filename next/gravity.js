@@ -1,7 +1,5 @@
-const numObjects = 500; // 150 is a good number, 330 is about max (on my computer)
-auto = true;
 let canvasWidth,
-    canvasHeight
+    canvasHeight;
 const minMaxX = 1000;
 const minMaxY = 1000;
 
@@ -88,11 +86,7 @@ const worker = new Worker('worker.js');
 worker.onmessage = e => {
   requestAnimationFrame(() => render(e.data.things, e.data.time));
 }
-worker.postMessage({
-  minMaxX,
-  minMaxY,
-  things: numObjects
-});
+worker.postMessage({ params: { minMaxX, minMaxY } });
 
 
 
