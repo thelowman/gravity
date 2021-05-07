@@ -8,33 +8,19 @@ let minMaxX;
 let minMaxY;
 
 
-/** degrees to radians */
-const dtor = d => d * Math.PI / 180;
-/** radians to degrees */
-const rtod = r => r * 180 / Math.PI;
-
-// EXPERIMENTAL
-/** sine lookup */
-let sine = [];
-for(let i = 0; i < 361; i++) sine.push(Math.sin(dtor(i)));
-/** cosine lookup */
-let cosine = [];
-for(let i = 0; i < 361; i++) cosine.push(Math.cos(dtor(i)));
-/** atan2 lookup */
-// ???????
-
 /** Random mass generator. */
 const mass = (i) => ({
-  i,
+  id: Math.random().toString(36).substring(7),
   x: Math.random() * minMaxX * 2 - minMaxX,
   y: Math.random() * minMaxY * 2 - minMaxY,
   mass: Math.random() * 50,
   v: { x: 0, y: 0 },
   g: { x: 0, y: 0 }
 });
-const reindex = things => {
-  for(let i = 0; i < things.length; i++) things[i].i = i;
-}
+/** degrees to radians */
+const dtor = d => d * Math.PI / 180;
+/** radians to degrees */
+const rtod = r => r * 180 / Math.PI;
 /** Distance between 2 points. */
 const distance = (a, b) => {
   let dx = b.x - a.x;
@@ -49,11 +35,7 @@ const attraction = (a, b, d) => (a.mass * b.mass) / (d * d);
 const vToP = (ang, mag) => ({
   x: mag * Math.cos(ang),
   y: mag * Math.sin(ang)
-  // x: ang > 0 ? mag * cosine[Math.round(rtod(ang))] : mag * cosine[Math.round(360 + rtod(ang))],
-  // y: ang > 0 ? mag * sine[Math.round(rtod(ang))] : mag * sine[Math.round(360 + rtod(ang))]
 });
-
-
 /** Roughly calculates the G-force on one object. */
 const calcG = things => a => things.reduce((g, b) => {
   if (a !== b) { // exclude itself
@@ -78,6 +60,7 @@ const calcG = things => a => things.reduce((g, b) => {
     attr: 0
   }
 });
+
 
 
 let collisions = [];
@@ -106,8 +89,7 @@ const update = things => {
     a.v.y = (a.v.y * am) + (b.v.y * bm);
 
     a.mass += b.mass;
-    things.splice(b.i, 1);
-    reindex(things);
+    things.splice(things.indexOf(b), 1);
   }
   // move objects
   for(let i = 0; i < things.length; i++) {
@@ -159,6 +141,7 @@ const play = () => {
   resume();
   return { stop, resume }
 }
+
 
 let control;
 onmessage = e => {
