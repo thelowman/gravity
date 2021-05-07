@@ -1,32 +1,5 @@
-let canvasWidth,
-    canvasHeight,
-    minMaxX,
-    minMaxY;
-// const minMaxX = 1000;
-// const minMaxY = 1000;
-
-const canvas = document.body.appendChild(document.createElement('canvas'));
-const ctx = canvas.getContext('2d');
-const resize = () => {
-  // decrease the size to prevent scroll bars
-  canvasWidth = window.innerWidth - 2;
-  canvasHeight = window.innerHeight - 4;
-
-  canvas.width = canvasWidth;
-  canvas.height = canvasHeight;
-
-  minMaxX = canvasWidth * .75;
-  minMaxY = canvasHeight * .75;
-  const scale = 1;
-  // const scale = canvasWidth > canvasHeight ?
-  //   canvasWidth / minMaxX * 1.5 :
-  //   canvasHeight / minMaxY * 1.5;
-
-  ctx.resetTransform();
-  ctx.translate(Math.floor(canvasWidth / 2), Math.floor(canvasHeight / 2));
-  ctx.scale(scale, scale * -1);
-}
-resize();
+import canvas from './canvas.js';
+const { ctx, minMaxX, minMaxY } = canvas();
 
 
 const objectType = mass => {
@@ -42,14 +15,12 @@ const objectType = mass => {
 }
 
 
-//ctx.fillStyle = '#333';
 ctx.font = '10px sans-serif';
 const render = (things, time) => {
   ctx.fillStyle = '#333';
   ctx.fillRect(minMaxX * -1, minMaxY * -1, minMaxX * 2, minMaxY * 2);
 
   let g, m;
-  //ctx.strokeStyle = '#fff';
   for(let i = 0; i < things.length; i++) {
 
     m = objectType(things[i].mass);
@@ -57,19 +28,6 @@ const render = (things, time) => {
     ctx.beginPath();
     ctx.arc(things[i].x, things[i].y, m.d, 0, Math.PI * 2, true);
     ctx.fill();
-
-    // original drawing
-    // if (things[i].mass < 1000) ctx.strokeStyle = '#fff';
-    // else if (things[i].mass < 2000) ctx.strokeStyle = '#ff0';
-    // else ctx.strokeStyle = '#f00';
-    // ctx.beginPath();
-    // ctx.arc(things[i].x, things[i].y, Math.floor(things[i].mass / 10), 0, Math.PI * 2, true);
-    // ctx.stroke();
-
-    // ctx.beginPath();
-    // ctx.moveTo(things[i].x, things[i].y);
-    // ctx.lineTo(things[i].x + things[i].g.x, things[i].y + things[i].g.y);
-    // ctx.stroke();
 
     ctx.strokeStyle = '#ff0';
     ctx.beginPath();

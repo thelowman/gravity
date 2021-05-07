@@ -124,6 +124,12 @@ const update = things => {
 }
 
 
+/**
+ * ## NOTE:
+ * As it stands right now, if you pause execution of the
+ * main thread this will keep running.  So when you resume
+ * the animation will jump many frames ahead.
+ */
 const play = () => {
   let things = [];
   for(let i = 0; i < numObjects; i++) things.push(mass(i));
