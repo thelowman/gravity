@@ -58,7 +58,8 @@ const calcG = things => a => things.reduce((g, b) => {
     thing: null,
     dist: 0,
     attr: 0
-  }
+  },
+  coll: null
 });
 
 
@@ -89,6 +90,7 @@ const update = things => {
     a.v.y = (a.v.y * am) + (b.v.y * bm);
 
     a.mass += b.mass;
+    a.coll = b; // put the collision here, it will be discarded next round
     things.splice(things.indexOf(b), 1);
   }
   // move objects
@@ -100,6 +102,7 @@ const update = things => {
     if (things[i].y > minMaxY) things[i].y = things[i].y + minMaxY * -2;
     if (things[i].y < minMaxY * -1) things[i].y = things[i].y + minMaxY * 2;
   }
+  // calculate collisions (for the next round)
   const gForce = calcG(things);
   collisions = things.reduce((coll, thing) => {
     thing.g = gForce(thing);
