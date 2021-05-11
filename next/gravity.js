@@ -1,4 +1,5 @@
 import canvas from './canvas.js';
+import renderer from './renderer.js';
 const { ctx, minMaxX, minMaxY } = canvas();
 
 
@@ -14,7 +15,12 @@ const objectType = mass => {
   return { d: mass / 100, c: '#000' } // black hole
 }
 
-
+const render = things => {
+  ctx.fillStyle = '#333';
+  ctx.fillRect(minMaxX * -1, minMaxY * -1, minMaxX * 2, minMaxY * 2);
+  renderer.render(ctx, things);
+}
+/*
 ctx.font = '10px sans-serif';
 const render = (things, time) => {
   ctx.fillStyle = '#333';
@@ -59,11 +65,14 @@ const render = (things, time) => {
     // }
   }
 }
+*/
 
 const worker = new Worker('worker.js');
 worker.onmessage = e => {
   e.data.things.sort((a, b) => a.mass > b.mass ? -1 : a.mass < b.mass ? 1 : 0);
-  requestAnimationFrame(() => render(e.data.things, e.data.time));
+  for(let i = 0; i < e.data.things.length; i++) renderer.register(e.data.things[i]);
+  requestAnimationFrame(() => render(e.data.things));
+  // requestAnimationFrame(() => render(e.data.things, e.data.time));
   if (e.data.things.length < 20) worker.postMessage({ cmd: 'restart' });
 }
 worker.postMessage({ params: { minMaxX, minMaxY, numObjects: 500 } });
