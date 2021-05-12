@@ -1,36 +1,55 @@
-const renderSphere = (context, s, x, y, r) => {
-  context.fillStyle = s;
+/** Vector to point. (copy) */
+const vToP = (ang, mag) => ({
+  x: mag * Math.cos(ang),
+  y: mag * Math.sin(ang)
+});
+/** degrees to radians. (copy) */
+const dtor = d => d * Math.PI / 180;
+
+
+const renderSphere = (context, c, x, y, r) => {
+  context.fillStyle = `rgba(${c.r * .5}, ${c.g * .5}, ${c.b * .5}, 0.5)`;
   context.beginPath();
   context.arc(x, y, r, 0, Math.PI * 2, true);
+  context.fill();
+  
+  context.fillStyle = `rgba(${c.r}, ${c.g}, ${c.b}, 0.5)`;
+  context.beginPath();
+  context.arc(x, y, r * .8, 0, Math.PI * 2, true);
+  context.fill();
+
+  context.fillStyle = `rgba(${c.r * 1.5}, ${c.g * 1.5}, ${c.b * 1.5}, 0.5)`;
+  context.beginPath();
+  context.arc(x, y, r * .2, 0, Math.PI * 2, true);
   context.fill();
 }
 
 const rock = (context, thing) => 
-  renderSphere(context, '#666', thing.x, thing.y, thing.mass / 12)
+  renderSphere(context, { r: 102, g: 102, b: 102 }, thing.x, thing.y, thing.mass / 12)
 
 const planetoid = (context, thing) => 
-  renderSphere(context, '#aaa', thing.x, thing.y, thing.mass / 15)
+  renderSphere(context, { r: 170, g: 170, b: 170 }, thing.x, thing.y, thing.mass / 15)
 
 const smPlanet = (context, thing) => 
-  renderSphere(context, '#bbb', thing.x, thing.y, thing.mass / 18)
+  renderSphere(context, { r: 187, g: 187, b: 187 }, thing.x, thing.y, thing.mass / 18)
 
 const earthy = (context, thing) => 
-  renderSphere(context, '#00f', thing.x, thing.y, thing.mass / 20)
+  renderSphere(context, { r: 0, g: 0, b: 255 }, thing.x, thing.y, thing.mass / 20)
 
 const jovian = (context, thing) => 
-  renderSphere(context, '#0f0', thing.x, thing.y, thing.mass / 25)
+  renderSphere(context, { r: 0, g: 255, b: 0 }, thing.x, thing.y, thing.mass / 25)
 
 const sun = (context, thing) => 
-  renderSphere(context, '#ff0', thing.x, thing.y, thing.mass / 30)
+  renderSphere(context, { r: 255, g: 255, b: 0 }, thing.x, thing.y, thing.mass / 30)
 
 const redGiant = (context, thing) => 
-  renderSphere(context, '#f00', thing.x, thing.y, thing.mass / 40)
+  renderSphere(context, { r: 255, g: 0, b: 0 }, thing.x, thing.y, thing.mass / 40)
 
 const neutronStar = (context, thing) => 
-  renderSphere(context, '#fff', thing.x, thing.y, thing.mass / 50)
+  renderSphere(context, { r: 255, g: 255, b: 255 }, thing.x, thing.y, thing.mass / 50)
 
 const blackHole = (context, thing) => 
-  renderSphere(context, '#000', thing.x, thing.y, thing.mass / 100)
+  renderSphere(context, { r: 0, g: 0, b: 0 }, thing.x, thing.y, thing.mass / 100)
 
 const regEntry = () => {
   const colliding = [];

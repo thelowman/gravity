@@ -7,7 +7,7 @@ export default () => {
   // const minMaxY = 1000;
 
   const canvas = document.body.appendChild(document.createElement('canvas'));
-  const ctx = canvas.getContext('2d');
+  const ctx = canvas.getContext('2d', { alpha: false });
   const resize = () => {
     // decrease the size to prevent scroll bars
     canvasWidth = window.innerWidth - 2;
