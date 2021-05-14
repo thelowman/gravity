@@ -109,7 +109,7 @@ const update = things => {
     if (
       thing.g.nearest.thing && (
         thing.g.nearest.dist < 4 ||
-        thing.g.nearest.attr > thing.g.nearest.dist * 30
+        thing.g.nearest.attr > thing.g.nearest.dist * 40
       )) {
       if (!coll.find(c => c.a === thing || c.b === thing))
         coll.push({ a: thing, b: thing.g.nearest.thing});
