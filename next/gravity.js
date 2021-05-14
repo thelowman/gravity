@@ -2,19 +2,6 @@ import canvas from './canvas.js';
 import renderer from './renderer.js';
 const { ctx, minMaxX, minMaxY } = canvas();
 
-
-const objectType = mass => {
-  if (mass < 150)  return { d: mass / 12, c: '#666' }; // rock
-  if (mass < 700)  return { d: mass / 15, c: '#aaa' }; // planetoid
-  if (mass < 800)  return { d: mass / 18, c: '#bbb' }; // small planet
-  if (mass < 900)  return { d: mass / 20, c: '#00f' }; // earthy
-  if (mass < 1200) return { d: mass / 25, c: '#0f0' }; // jovian
-  if (mass < 1500) return { d: mass / 30, c: '#ff0' }; // sun
-  if (mass < 2000) return { d: mass / 40, c: '#f00' }; // red giant
-  if (mass < 2500) return { d: mass / 50, c: '#fff' }; // neutron star
-  return { d: mass / 100, c: '#000' } // black hole
-}
-
 const render = things => {
   ctx.fillStyle = '#000';
   ctx.fillRect(minMaxX * -1, minMaxY * -1, minMaxX * 2, minMaxY * 2);
@@ -26,7 +13,6 @@ worker.onmessage = e => {
   e.data.things.sort((a, b) => a.mass > b.mass ? -1 : a.mass < b.mass ? 1 : 0);
   for(let i = 0; i < e.data.things.length; i++) renderer.register(e.data.things[i]);
   requestAnimationFrame(() => render(e.data.things));
-  // requestAnimationFrame(() => render(e.data.things, e.data.time));
   if (e.data.things.length < 20) worker.postMessage({ cmd: 'restart' });
 }
 worker.postMessage({ params: { minMaxX, minMaxY, numObjects: 500 } });
