@@ -16,7 +16,7 @@ const objectType = mass => {
 }
 
 const render = things => {
-  ctx.fillStyle = '#333';
+  ctx.fillStyle = '#000'; //'#333';
   ctx.fillRect(minMaxX * -1, minMaxY * -1, minMaxX * 2, minMaxY * 2);
   renderer.render(ctx, things);
 }
