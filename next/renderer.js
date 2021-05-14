@@ -6,40 +6,6 @@ const renderSphere = (context, c, x, y, r) => {
   context.beginPath();
   context.arc(x, y, r, 0, Math.PI * 2, true);
   context.fill();
-
-  // context.fillStyle = `rgba(0, 0, 0, 1)`;
-  // context.beginPath();
-  // context.arc(x, y, r, 0, Math.PI * 2, true);
-  // context.fill();
-
-  // const steps = r / 6;
-  // const inc = r / steps;
-  // let dx, dy, dr;
-  // for(let i = 0; i < steps; i++) {
-  //   dx = x > 0 ? x - i : x + i;
-  //   dy = y > 0 ? y + i : y - i;
-  //   dr = inc * i / 4;
-  //   context.fillStyle = `rgba(${c.r + (inc * i)}, ${c.g + (inc * i)}, ${c.b + (inc * i)}, .25)`;
-  //   // context.fillStyle = `rgba(${c.r/2 + (inc*i/2)}, ${c.g/2 + (inc*i/2)}, ${c.b/2 + (inc*i/2)}, 1)`;
-  //   context.beginPath();
-  //   context.arc(x - dr, y + dr, r - (inc * i), 0, Math.PI * 2, true);
-  //   // context.arc(x - i, y + i, r - (inc * i), 0, Math.PI * 2, true);
-  //   context.fill();
-  // }
-  // context.fillStyle = `rgba(${c.r * .5}, ${c.g * .5}, ${c.b * .5}, 0.5)`;
-  // context.beginPath();
-  // context.arc(x, y, r, 0, Math.PI * 2, true);
-  // context.fill();
-  
-  // context.fillStyle = `rgba(${c.r}, ${c.g}, ${c.b}, 0.5)`;
-  // context.beginPath();
-  // context.arc(x, y, r * .8, 0, Math.PI * 2, true);
-  // context.fill();
-
-  // context.fillStyle = `rgba(${c.r * 1.5}, ${c.g * 1.5}, ${c.b * 1.5}, 0.5)`;
-  // context.beginPath();
-  // context.arc(x, y, r * .2, 0, Math.PI * 2, true);
-  // context.fill();
 }
 
 

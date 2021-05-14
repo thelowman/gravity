@@ -16,56 +16,10 @@ const objectType = mass => {
 }
 
 const render = things => {
-  ctx.fillStyle = '#000'; //'#333';
+  ctx.fillStyle = '#000';
   ctx.fillRect(minMaxX * -1, minMaxY * -1, minMaxX * 2, minMaxY * 2);
   renderer.render(ctx, things);
 }
-/*
-ctx.font = '10px sans-serif';
-const render = (things, time) => {
-  ctx.fillStyle = '#333';
-  ctx.fillRect(minMaxX * -1, minMaxY * -1, minMaxX * 2, minMaxY * 2);
-
-  let g, m;
-  for(let i = 0; i < things.length; i++) {
-
-    m = objectType(things[i].mass);
-    ctx.fillStyle = m.c;
-    ctx.beginPath();
-    ctx.arc(things[i].x, things[i].y, m.d, 0, Math.PI * 2, true);
-    ctx.fill();
-
-    ctx.strokeStyle = '#ff0';
-    ctx.beginPath();
-    ctx.moveTo(things[i].x, things[i].y);
-    ctx.lineTo(things[i].x + things[i].v.x, things[i].y + things[i].v.y);
-    ctx.stroke();
-
-    // Axis
-    // ctx.beginPath();
-    // ctx.moveTo(-1000, 0);
-    // ctx.lineTo(1000, 0);
-    // ctx.stroke();
-    // ctx.beginPath();
-    // ctx.moveTo(0, -1000);
-    // ctx.lineTo(0, 1000);
-    // ctx.stroke();
-    // ctx.beginPath();
-    // ctx.moveTo(-100, -100);
-    // ctx.lineTo(-100, 100);
-    // ctx.lineTo(100, 100);
-    // ctx.lineTo(100, -100);
-    // ctx.lineTo(-100, -100);
-    // ctx.stroke();
-
-    // if (time) {
-    //   // text is upside down due to scaling
-    //   ctx.fillStyle = '#ff0';
-    //   ctx.fillText(time, 0, 0);
-    // }
-  }
-}
-*/
 
 const worker = new Worker('worker.js');
 worker.onmessage = e => {
