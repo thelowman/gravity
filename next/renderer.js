@@ -12,12 +12,19 @@ const renderSphere = (context, c, x, y, r) => {
 const blendColors = (thing, color) => {
   if (!thing.coll) return color;
   if (!registry[thing.coll.id]) return color;
-  color.r += registry[thing.coll.id].color.r;
-  color.g += registry[thing.coll.id].color.g;
-  color.b += registry[thing.coll.id].color.b;
-  if (color.r > 255) color.r = 255;
-  if (color.g > 255) color.g = 255;
-  if (color.b > 255) color.b = 255;
+  let ratio = thing.coll.mass / thing.mass;
+  color.r += registry[thing.coll.id].color.r * ratio;
+  color.g += registry[thing.coll.id].color.g * ratio;
+  color.b += registry[thing.coll.id].color.b * ratio;
+  let max = color.r;
+  if (color.g > max) max = color.g;
+  if (color.b > max) max = color.b;
+  if (max > 255) {
+    let adj = max - 255;
+    color.r = color.r > adj ? color.r - adj : 0;
+    color.g = color.g > adj ? color.g - adj : 0;
+    color.b = color.b > adj ? color.b - adj : 0;
+  }
   delete registry[thing.coll.id];
   return blendColors(thing.coll, color);
 }
@@ -25,9 +32,9 @@ const blendColors = (thing, color) => {
 const regEntry = () => {
   const color = { r: 0, g: 0, b: 0 };
   let bias = Math.random() * 3;
-  if (bias > 2) color.r = Math.random() * 80;
-  else if (bias > 1) color.g = Math.random() * 80;
-  else color.b = Math.random() * 80;
+  if (bias > 2) color.r = (Math.random() * 80) + 175;
+  else if (bias > 1) color.g = (Math.random() * 80) + 175;
+  else color.b = (Math.random() * 80) + 175;
   return {
     color,
     render: (context, thing) => {
