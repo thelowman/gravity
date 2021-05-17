@@ -49,6 +49,7 @@ let registry = {};
 const register = thing => {
   if (!registry[thing.id]) registry[thing.id] = regEntry();
 }
+let resetting = false;
 const render = (context, things) => {
   let obsolete = Object.keys(registry);
   for(let i = 0; i < things.length; i++) {
@@ -56,10 +57,14 @@ const render = (context, things) => {
     let tIndex = obsolete.indexOf(things[i].id);
     if (tIndex > -1) obsolete.splice(tIndex, 1);
   }
+  if (resetting) {
+    registry = {};
+    resetting = false;
+  }
 }
 
 export default {
   register,
   render,
-  reset: () => registry = {}
+  reset: () => resetting = true
 }

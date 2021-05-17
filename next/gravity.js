@@ -16,8 +16,8 @@ worker.onmessage = e => {
   for(let i = 0; i < e.data.things.length; i++) renderer.register(e.data.things[i]);
   requestAnimationFrame(() => render(e.data.things));
   if (e.data.things.length < minObjects) {
-    worker.postMessage({ cmd: 'restart' });
     renderer.reset();
+    worker.postMessage({ cmd: 'restart' });
   }
 }
 worker.postMessage({ params: { minMaxX, minMaxY, numObjects: maxObjects } });
