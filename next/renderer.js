@@ -60,5 +60,6 @@ const render = (context, things) => {
 
 export default {
   register,
-  render
+  render,
+  reset: () => registry = {}
 }

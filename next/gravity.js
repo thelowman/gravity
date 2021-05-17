@@ -8,14 +8,19 @@ const render = things => {
   renderer.render(ctx, things);
 }
 
-const worker = new Worker('worker.js');
+const maxObjects = Math.floor(Math.sqrt(minMaxX * minMaxY) / 2);
+const minObjects = Math.floor(Math.sqrt(maxObjects));
+const worker = new Worker('../next/worker.js');
 worker.onmessage = e => {
   e.data.things.sort((a, b) => a.mass > b.mass ? -1 : a.mass < b.mass ? 1 : 0);
   for(let i = 0; i < e.data.things.length; i++) renderer.register(e.data.things[i]);
   requestAnimationFrame(() => render(e.data.things));
-  if (e.data.things.length < 20) worker.postMessage({ cmd: 'restart' });
+  if (e.data.things.length < minObjects) {
+    worker.postMessage({ cmd: 'restart' });
+    renderer.reset();
+  }
 }
-worker.postMessage({ params: { minMaxX, minMaxY, numObjects: 500 } });
+worker.postMessage({ params: { minMaxX, minMaxY, numObjects: maxObjects } });
 
 
 // MDN - https://developer.mozilla.org/en-US/docs/Web/API/Page_Visibility_API

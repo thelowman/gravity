@@ -3,23 +3,76 @@
   <meta charset="utf-8">
   <title>Gravity</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: sans-serif;
+      font-size: 18px;
+      display: flex;
+      justify-content: center;
+    }
+    section {
+      max-width: 600px;
+    }
+    canvas {
+      width: 100%;
+      height: 300px;
+      border-radius: 8px;
+      box-shadow: 4px 4px 6px rgb(0 0 0 / 50%);
+    }
+    .fullscreen {
+      margin-top: 1em;
+    }
+    .gitHub {
+      margin-top: 1em;
+      display: flex;
+      align-items: center;
+    }
+    .littleTooBig {
+      width: 32px;
+    }
+  </style>
 </head>
 <body>
 
-  <div>
-    <a href="next/index.html">New Version</a>
-  </div>
+  <section>
+    <figure>
+      <img src="icon.svg" alt="Gravity Icon">
+    </figure>
+  
+    <article>
+      <h2>Gravity</h2>
+      <p>
+        Gravity is an attempt to simulate the gravitational attraction of
+        multiple object on each other.  It's (somewhat loosely) based on
+        Newton's equations.  I'm no Astrophysicist but if you take true genius,
+        squash the Universe into a 2 dimensional plane, toss out
+        the stuff that is hard to understand and fiddle with the remainder
+        until it looks about right, then you end up with something like this.
+      </p>
+      <p>
+        There was an old Windows 95 screen saver that inspired me to write this.
+        I tried to find it but I think it was shareware and I don't have anything
+        to run it on anyway.  My result isn't an exact copy.  The original drew
+        rocks, planets and stars, but I found it more interesting just to use
+        colors to indicate each mass.
+      </p>
+    </article>
+  
+    <canvas id="gravity"></canvas>
 
-  <script>
-    // some crude tests to get a sense of the time required
-    const test = {
-      atan2: () => {
-        const start = performance.now();
-        for(let i = 0; i < 1000000; i++) {
-          Math.atan2(1, i / 100);
-        }
-        console.log(performance.now() - start);
-      }
-    }
-  </script>
+    <div class="fullscreen">
+      It's better when you go <a href="next/index.html">fullscreen.</a>
+    </div>
+
+    <div class="gitHub">
+      <div>
+        <img class="littleTooBig" src="GitHub-Mark-64px.png" alt="GitHub">
+      </div>
+      <div>
+        This project's source code is at <a href="https://github.com/thelowman/gravity">GitHub.</a>
+      </div>
+    </div>
+  </section>
+
+  <script src='./next/gravity.js' type='module'></script>
 </body>
