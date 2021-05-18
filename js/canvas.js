@@ -2,12 +2,7 @@
   Prepares a canvas element for rendering.
 */
 
-/**
- * @typedef CanvasSetup
- * @property {CanvasRenderingContext2D} ctx
- * @property {number} minMaxX Maximum x value (positive or negative)
- * @property {number} minMaxY Maximum y value (positive or negative)
- */
+import './types.js';
 
 /**
  * Initializes the canvas element.

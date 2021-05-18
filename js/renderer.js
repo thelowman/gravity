@@ -5,17 +5,7 @@
   render function but there all kinds of possibilities.
 */
 
-/**
- * @typedef Color Represents an RGB color.
- * @property {number} r Red
- * @property {number} g Green
- * @property {number} b Blue
- * 
- * @typedef RegEntry Contains the state of a registered object.
- * @property {Color} color The current color of the object.
- * @property {(CanvasRenderingContext2D, Thing) => void} render Render function.
- */
-
+import './types.js';
 
 /** Holds the state of all rendered objects. */
 let registry = {};

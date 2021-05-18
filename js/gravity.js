@@ -22,13 +22,13 @@ const render = things => {
 }
 
 /** Spawn a worker thread. */
-const worker = new Worker('js/worker/worker.js');
+const worker = new Worker('js/worker/worker.js', { type: 'module' });
 /** The worker supplies an array of objects that need to be rendered. */
 worker.onmessage = e => {
-  e.data.things.sort((a, b) => a.mass > b.mass ? -1 : a.mass < b.mass ? 1 : 0);
-  for(let i = 0; i < e.data.things.length; i++) renderer.register(e.data.things[i]);
-  requestAnimationFrame(() => render(e.data.things));
-  if (e.data.things.length < minObjects) {
+  e.data.sort((a, b) => a.mass > b.mass ? -1 : a.mass < b.mass ? 1 : 0);
+  for(let i = 0; i < e.data.length; i++) renderer.register(e.data[i]);
+  requestAnimationFrame(() => render(e.data));
+  if (e.data.length < minObjects) {
     renderer.reset();
     worker.postMessage({ cmd: 'restart' });
   }

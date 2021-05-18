@@ -5,31 +5,9 @@
   each frame.
 */
 
-/**
- * @typedef Thing Represents some mass in our little universe.
- * @property {string} id A unique ID for the item.
- * @property {number} x The x coordinate.
- * @property {number} y The y coordinate.
- * @property {number} mass The object's mass.
- * @property {Point} v The object's velocity.
- * @property {GForce} g Gravitational pull on the object.
- * @property {Thing=} coll An object this is colliding with.
- * 
- * @typedef Point Generic representation of a coordinate, vector, or other.
- * @property {number} x
- * @property {number} y
- * 
- * @typedef GForce Gravitational information acting on an object.
- * @property {number} x Expressed as a point instead of angle/magnitude
- * @property {number} y Expressed as a point instead of angle/magnitude
- * @property {Nearest} nearest The nearest other object.
- * @property {Thing=} coll An object this is colliding with.
- * 
- * @typedef Nearest Information about the nearest object.
- * @property {Thing} thing The object closest to this.
- * @property {number} dist The distance to the nearest thing.
- * @property {number} attr The attraction to this nearest object.
- */
+import '../types.js';
+import p from './physics.js';
+
 
 /**
  * Milliseconds between frames.
@@ -53,105 +31,28 @@ let minMaxX;
 let minMaxY;
 
 
-/** Random mass generator. */
-const mass = () => ({
-  id: Math.random().toString(36).substring(7),
-  x: Math.random() * minMaxX * 2 - minMaxX,
-  y: Math.random() * minMaxY * 2 - minMaxY,
-  mass: Math.random() * 50,
-  v: { x: 0, y: 0 },
-  g: { x: 0, y: 0 }
-});
-/** 
- * Degrees to radians.
- * @param {number} d Angle in degrees.
- */
-const dtor = d => d * Math.PI / 180;
-/**
- * radians to degrees
- * @param {number} r Angle in radians.
- */
-const rtod = r => r * 180 / Math.PI;
-/**
- * Distance between 2 points.
- * @param {Thing} a
- * @param {Thing} b
- * @returns {number}
- */
-const distance = (a, b) => {
-  let dx = b.x - a.x;
-  let dy = b.y - a.y;  
-  return Math.sqrt((dx * dx) + (dy * dy));
-}
-/**
- * Agngle between 2 points (radians).
- * @param {Thing} a
- * @param {Thing} b
- * @returns {number} The angle in radians.
- */
-const angle = (a, b) => Math.atan2(b.y - a.y, b.x - a.x);
-/**
- * Simple gravitational attraction calculation.
- * @param {Thing} a
- * @param {Thing} b
- * @param {number} d Distance as a param so we don't have to calculate it again.
- * @returns {number} A value representing the g-force.
- */
-const attraction = (a, b, d) => (a.mass * b.mass) / (d * d);
-/**
- * Vector to point. Converts a vector to a point.
- * @param {number} ang The vector's angle.
- * @param {number} mag The vector's value (magnitude).
- */
-const vToP = (ang, mag) => ({
-  x: mag * Math.cos(ang),
-  y: mag * Math.sin(ang)
-});
-/** Roughly calculates the G-force on one object. */
-const calcG = things => a => things.reduce((g, b) => {
-  if (a !== b) { // exclude itself
-    const dist = distance(a, b);
-    const attr = attraction(a, b, dist);
-    const pt = vToP(angle(a, b), attr);
-    g.x += pt.x;
-    g.y += pt.y;
-    if (g.nearest.thing == null || g.nearest.dist > dist) {
-      g.nearest.thing = b;
-      g.nearest.dist = dist;
-      g.nearest.attr = attr;
-    }
-  }
-  return g;
-}, {
-  x:0,
-  y:0,
-  nearest: {
-    thing: null,
-    dist: 0,
-    attr: 0
-  },
-  coll: null
-});
-
-
 /** Holds things that will collide on the next update. */
 let collisions = [];
 /** Will be true if we're in the middle of an update. */
 let updating = false;
 
+
 /**
+ * Removes objects that have collided with other objects, updates
+ * item positions and velocity, and identifies collisions for the
+ * next round.
  * 
+ * Though this returns an array of objects, it is not a pure function.
  * @param {Thing[]} things 
- * @returns 
+ * @returns {Thing[]}
  */
 const update = things => {
-  // This doesn't seem to work, but I don't know why yet.
+  // TODO: This doesn't seem to work, but I don't know why yet.
   if (updating) {
     console.log('[dropped frame]');
     return;
   }
   updating = true;
-  let start = performance.now();
   // handle collisions
   for (let i = 0; i < collisions.length; i++) {
     let a = collisions[i].a;
@@ -169,6 +70,7 @@ const update = things => {
     a.v.y = (a.v.y * am) + (b.v.y * bm);
 
     a.mass += b.mass;
+    // TODO: Find out if the following statement true?
     a.coll = b; // put the collision here, it will be discarded next round
     things.splice(things.indexOf(b), 1);
   }
@@ -182,7 +84,7 @@ const update = things => {
     if (things[i].y < minMaxY * -1) things[i].y = things[i].y + minMaxY * 2;
   }
   // calculate collisions (for the next round)
-  const gForce = calcG(things);
+  const gForce = p.calcG(things);
   collisions = things.reduce((coll, thing) => {
     thing.g = gForce(thing);
     if (
@@ -200,21 +102,22 @@ const update = things => {
     return coll;
   }, []);
 
-  let time = performance.now() - start;
   updating = false;
-  return { things, time };
+  return things;
 }
 
 
 /**
- * ## NOTE:
- * As it stands right now, if you pause execution of the
- * main thread this will keep running.  So when you resume
- * the animation will jump many frames ahead.
+ * Starts the worker.
+ * > ### NOTE:
+ * > As it stands right now, if you pause execution of the
+ * > main thread this will keep running.  So when you resume
+ * > the animation will jump many frames ahead.
+ * @returns {WorkerControls}
  */
 const play = () => {
   let things = [];
-  for(let i = 0; i < numObjects; i++) things.push(mass());
+  for(let i = 0; i < numObjects; i++) things.push(p.mass(minMaxX, minMaxY));
 
   let interval = null;
   const stop = () => {
