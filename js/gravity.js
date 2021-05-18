@@ -1,16 +1,29 @@
+/*
+  This is the main script.  It controls a worker thread which
+  repeatedly recalculates the effect of gravity and calls the
+  main render function on every update.
+*/
+
 import canvas from './canvas.js';
 import renderer from './renderer.js';
 const { ctx, minMaxX, minMaxY } = canvas();
 
+/** Sets a reasonable maximum number of rendered objects based on the canvas size. */
+const maxObjects = Math.floor(Math.sqrt(minMaxX * minMaxY) / 2);
+/** Automatically reset when the number of objects gets below this number. */
+const minObjects = Math.floor(Math.sqrt(maxObjects));
+
+
+/** The render loop. */
 const render = things => {
   ctx.fillStyle = '#000';
   ctx.fillRect(minMaxX * -1, minMaxY * -1, minMaxX * 2, minMaxY * 2);
   renderer.render(ctx, things);
 }
 
-const maxObjects = Math.floor(Math.sqrt(minMaxX * minMaxY) / 2);
-const minObjects = Math.floor(Math.sqrt(maxObjects));
-const worker = new Worker('../next/worker.js');
+/** Spawn a worker thread. */
+const worker = new Worker('js/worker/worker.js');
+/** The worker supplies an array of objects that need to be rendered. */
 worker.onmessage = e => {
   e.data.things.sort((a, b) => a.mass > b.mass ? -1 : a.mass < b.mass ? 1 : 0);
   for(let i = 0; i < e.data.things.length; i++) renderer.register(e.data.things[i]);
@@ -20,18 +33,22 @@ worker.onmessage = e => {
     worker.postMessage({ cmd: 'restart' });
   }
 }
+/** Fire up the worker. */
 worker.postMessage({ params: { minMaxX, minMaxY, numObjects: maxObjects } });
 
 
+// The worker thread should be paused when the window isn't visible.
 // MDN - https://developer.mozilla.org/en-US/docs/Web/API/Page_Visibility_API
 // Set the name of the hidden property and the change event for visibility
 let hidden, visibilityChange;
 if (typeof document.hidden !== "undefined") { // Opera 12.10 and Firefox 18 and later support
   hidden = "hidden";
   visibilityChange = "visibilitychange";
+// @ts-ignore
 } else if (typeof document.msHidden !== "undefined") {
   hidden = "msHidden";
   visibilityChange = "msvisibilitychange";
+// @ts-ignore
 } else if (typeof document.webkitHidden !== "undefined") {
   hidden = "webkitHidden";
   visibilityChange = "webkitvisibilitychange";
@@ -41,40 +58,3 @@ function handleVisibilityChange() {
   else worker.postMessage({ cmd: 'resume'});
 }
 document.addEventListener(visibilityChange, handleVisibilityChange, false);
-
-
-
-
-
-
-
-
-
-
-
-// NOT USED
-/** Blow stuff up if it gets too heavy. */
-const explode = thing => {
-  let mass = thing.mass;
-  let part = 0;
-  let masses = [];
-  while(part < mass) {
-    part = Math.random() * .35 * thing.mass;
-    masses.push(part);
-    mass -= part;
-  }
-  const angleInc = Math.PI * 2 / masses.length;
-  let nextAngle = angleInc;
-  for(let i = 0; i < masses.length; i++) {
-    const exMove = vToP(nextAngle, 10);
-    nextAngle += angleInc;
-    things.push({
-      i: 0,
-      x: thing.x,
-      y: thing.y,
-      mass: masses[i],
-      v: { x: exMove.x + thing.v.x, y: exMove.y + thing.v.y },
-      g: { x: 0, y: 0 }
-    });
-  }
-}

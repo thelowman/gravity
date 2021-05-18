@@ -1,15 +1,60 @@
-/** Milliseconds between frames. */
+/*
+  This is the worker script.  It calculates all the g-forces and moves
+  objects around in space.  It also determines collisions between objects.
+  This posts an updated array of Things back to the UI thread for 
+  each frame.
+*/
+
+/**
+ * @typedef Thing Represents some mass in our little universe.
+ * @property {string} id A unique ID for the item.
+ * @property {number} x The x coordinate.
+ * @property {number} y The y coordinate.
+ * @property {number} mass The object's mass.
+ * @property {Point} v The object's velocity.
+ * @property {GForce} g Gravitational pull on the object.
+ * @property {Thing=} coll An object this is colliding with.
+ * 
+ * @typedef Point Generic representation of a coordinate, vector, or other.
+ * @property {number} x
+ * @property {number} y
+ * 
+ * @typedef GForce Gravitational information acting on an object.
+ * @property {number} x Expressed as a point instead of angle/magnitude
+ * @property {number} y Expressed as a point instead of angle/magnitude
+ * @property {Nearest} nearest The nearest other object.
+ * @property {Thing=} coll An object this is colliding with.
+ * 
+ * @typedef Nearest Information about the nearest object.
+ * @property {Thing} thing The object closest to this.
+ * @property {number} dist The distance to the nearest thing.
+ * @property {number} attr The attraction to this nearest object.
+ */
+
+/**
+ * Milliseconds between frames.
+ * @type {number}
+ */
 const targetFrameInterval = 33;
-/** Inital number of objects. */
+/**
+ * Inital number of objects.
+ * @type {number}
+ */
 let numObjects;
-/** Minimum/maximum values for x. */
+/**
+ * Minimum/maximum values for x.
+ * @type {number}
+ */
 let minMaxX;
-/** Minimum/maximum values for y. */
+/**
+ * Minimum/maximum values for y.
+ * @type {number}
+ */
 let minMaxY;
 
 
 /** Random mass generator. */
-const mass = (i) => ({
+const mass = () => ({
   id: Math.random().toString(36).substring(7),
   x: Math.random() * minMaxX * 2 - minMaxX,
   y: Math.random() * minMaxY * 2 - minMaxY,
@@ -17,21 +62,47 @@ const mass = (i) => ({
   v: { x: 0, y: 0 },
   g: { x: 0, y: 0 }
 });
-/** degrees to radians */
+/** 
+ * Degrees to radians.
+ * @param {number} d Angle in degrees.
+ */
 const dtor = d => d * Math.PI / 180;
-/** radians to degrees */
+/**
+ * radians to degrees
+ * @param {number} r Angle in radians.
+ */
 const rtod = r => r * 180 / Math.PI;
-/** Distance between 2 points. */
+/**
+ * Distance between 2 points.
+ * @param {Thing} a
+ * @param {Thing} b
+ * @returns {number}
+ */
 const distance = (a, b) => {
   let dx = b.x - a.x;
   let dy = b.y - a.y;  
   return Math.sqrt((dx * dx) + (dy * dy));
 }
-/** Agngle between 2 points (radians). */
+/**
+ * Agngle between 2 points (radians).
+ * @param {Thing} a
+ * @param {Thing} b
+ * @returns {number} The angle in radians.
+ */
 const angle = (a, b) => Math.atan2(b.y - a.y, b.x - a.x);
-/** Simple gravitational attraction calculation. */
+/**
+ * Simple gravitational attraction calculation.
+ * @param {Thing} a
+ * @param {Thing} b
+ * @param {number} d Distance as a param so we don't have to calculate it again.
+ * @returns {number} A value representing the g-force.
+ */
 const attraction = (a, b, d) => (a.mass * b.mass) / (d * d);
-/** Vector to point. */
+/**
+ * Vector to point. Converts a vector to a point.
+ * @param {number} ang The vector's angle.
+ * @param {number} mag The vector's value (magnitude).
+ */
 const vToP = (ang, mag) => ({
   x: mag * Math.cos(ang),
   y: mag * Math.sin(ang)
@@ -63,10 +134,18 @@ const calcG = things => a => things.reduce((g, b) => {
 });
 
 
-
+/** Holds things that will collide on the next update. */
 let collisions = [];
+/** Will be true if we're in the middle of an update. */
 let updating = false;
+
+/**
+ * 
+ * @param {Thing[]} things 
+ * @returns 
+ */
 const update = things => {
+  // This doesn't seem to work, but I don't know why yet.
   if (updating) {
     console.log('[dropped frame]');
     return;
@@ -135,7 +214,7 @@ const update = things => {
  */
 const play = () => {
   let things = [];
-  for(let i = 0; i < numObjects; i++) things.push(mass(i));
+  for(let i = 0; i < numObjects; i++) things.push(mass());
 
   let interval = null;
   const stop = () => {
@@ -145,6 +224,7 @@ const play = () => {
     }
   }
   const resume = () => {
+    // @ts-ignore (this is worker.postMessage, not window.postMessage)
     interval = setInterval(() => postMessage(update(things)), targetFrameInterval);
   }
   resume();

@@ -1,3 +1,35 @@
+/*
+  Renders objects to the canvas.  Worker threads can only post data back
+  to the UI, so this script keeps a registry with stateful information
+  about individual objects.  Currently that's just the color and a small
+  render function but there all kinds of possibilities.
+*/
+
+/**
+ * @typedef Color Represents an RGB color.
+ * @property {number} r Red
+ * @property {number} g Green
+ * @property {number} b Blue
+ * 
+ * @typedef RegEntry Contains the state of a registered object.
+ * @property {Color} color The current color of the object.
+ * @property {(CanvasRenderingContext2D, Thing) => void} render Render function.
+ */
+
+
+/** Holds the state of all rendered objects. */
+let registry = {};
+
+
+/**
+ * Renders a gradient filled circle at the specified
+ * coordinates using the specified color.
+ * @param {CanvasRenderingContext2D} context 
+ * @param {Color} c The color of the sphere.
+ * @param {number} x X coordinate of the sphere's center.
+ * @param {number} y Y coordinate of the sphere's center.
+ * @param {number} r The radius of the sphere in pixels.
+ */
 const renderSphere = (context, c, x, y, r) => {
   let gradient = context.createRadialGradient(x, y, r, x-r/3, y+r/3, 0);
   gradient.addColorStop(0, `rgba(${c.r / 10},${c.g / 10},${c.b / 10})`);
@@ -8,7 +40,13 @@ const renderSphere = (context, c, x, y, r) => {
   context.fill();
 }
 
-
+/**
+ * Modifies a color by recursively blending colors of other
+ * objects that the provided Thing is colliding with based
+ * on their relative mass.
+ * @param {Thing} thing 
+ * @param {Color} color 
+ */
 const blendColors = (thing, color) => {
   if (!thing.coll) return color;
   if (!registry[thing.coll.id]) return color;
@@ -29,6 +67,10 @@ const blendColors = (thing, color) => {
   return blendColors(thing.coll, color);
 }
 
+/**
+ * Creates a new entry in the registry.
+ * @returns {RegEntry}
+ */
 const regEntry = () => {
   const color = { r: 0, g: 0, b: 0 };
   let bias = Math.random() * 3;
@@ -44,12 +86,22 @@ const regEntry = () => {
   }
 }
 
-
-let registry = {};
+/**
+ * Ensures the provided Thing object is in the registry.
+ * @param {Thing} thing 
+ */
 const register = thing => {
   if (!registry[thing.id]) registry[thing.id] = regEntry();
 }
+
+/** Indicates that a reset should be performed after the next render cycle. */
 let resetting = false;
+
+/**
+ * Renders all Things to the canvas and removes unused registry entries.
+ * @param {CanvasRenderingContext2D} context 
+ * @param {Thing[]} things 
+ */
 const render = (context, things) => {
   let obsolete = Object.keys(registry);
   for(let i = 0; i < things.length; i++) {
@@ -60,6 +112,9 @@ const render = (context, things) => {
   if (resetting) {
     registry = {};
     resetting = false;
+  }
+  else {
+    for(let i = 0; i < obsolete.length; i++) delete registry[obsolete[i]];
   }
 }
 
