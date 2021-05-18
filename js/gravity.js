@@ -19,6 +19,14 @@ const render = things => {
   ctx.fillStyle = '#000';
   ctx.fillRect(minMaxX * -1, minMaxY * -1, minMaxX * 2, minMaxY * 2);
   renderer.render(ctx, things);
+
+  // ctx.strokeStyle = '#fff';
+  // ctx.beginPath();
+  // ctx.strokeRect(minMaxX * -1, minMaxY * -1, minMaxX * 2, minMaxY * 2);
+  // ctx.fillStyle = '#fff';
+  // ctx.beginPath();
+  // ctx.arc(0, 0, 2, 0, Math.PI * 2, true);
+  // ctx.fill();
 }
 
 /** Spawn a worker thread. */
