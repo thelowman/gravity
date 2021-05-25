@@ -80,33 +80,46 @@ const vToP = (ang, mag) => ({
 
 
 /**
+ * Checks a single coordinate value (either x or y) and translates it
+ * to the opposite side of the boundary if it is out of bounds, causing
+ * the object to "wrap" around the universe.
+ * @param {number} minMax Maximum positive or negative value.
+ * @returns {(number) => number} Function to calculate the new coordinate.
+ */
+const wrap = minMax => xy => 
+  Math.abs(xy) > minMax ? xy > 0 ? xy - minMax * 2 : xy + minMax * 2 : xy;
+
+
+/**
  * Roughly calculates the G-force on one object.
  * @param {Thing[]} things 
  * @returns {(Thing) => GForce} Function to calculate the G-Force on an object.
  */
-const calcG = things => a => things.reduce((g, b) => {
-  if (a !== b) { // exclude itself
-    const dist = distance(a, b);
-    const attr = attraction(a, b, dist);
-    const pt = vToP(angle(a, b), attr);
-    g.x += pt.x;
-    g.y += pt.y;
-    if (g.nearest.thing == null || g.nearest.dist > dist) {
-      g.nearest.thing = b;
-      g.nearest.dist = dist;
-      g.nearest.attr = attr;
+const calcG = things => a => {
+  return things.reduce((g, b) => {
+    if (a !== b) { // exclude itself
+      const dist = distance(a, b);
+      const attr = attraction(a, b, dist);
+      const pt = vToP(angle(a, b), attr);
+      g.x += pt.x;
+      g.y += pt.y;
+      if (g.nearest.thing == null || g.nearest.dist > dist) {
+        g.nearest.thing = b;
+        g.nearest.dist = dist;
+        g.nearest.attr = attr;
+      }
     }
-  }
-  return g;
-}, {
-  x:0,
-  y:0,
-  nearest: {
-    thing: null,
-    dist: 0,
-    attr: 0
-  },
-  coll: null
-});
+    return g;
+  }, {
+    x:0,
+    y:0,
+    nearest: {
+      thing: null,
+      dist: 0,
+      attr: 0
+    },
+    coll: null
+  });
+}
  
-export default { mass, calcG }
+export default { mass, calcG, wrap }

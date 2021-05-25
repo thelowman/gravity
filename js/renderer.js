@@ -31,6 +31,32 @@ const renderSphere = (context, c, x, y, r) => {
 }
 
 /**
+ * Draws a line indicating the sum G force on an object.
+ * @param {CanvasRenderingContext2D} context 
+ * @param {Thing} thing 
+ */
+const renderG = (context, thing) => {
+  context.strokeStyle = '#fff';
+  context.beginPath();
+  context.moveTo(thing.x, thing.y);
+  context.lineTo(thing.g.x + thing.x, thing.g.y + thing.y);
+  context.stroke(); 
+}
+
+/**
+ * Draws a line indicating the object's velocity and direction.
+ * @param {CanvasRenderingContext2D} context 
+ * @param {Thing} thing 
+ */
+const renderV = (context, thing) => {
+  context.strokeStyle = '#ff0';
+  context.beginPath();
+  context.moveTo(thing.x, thing.y);
+  context.lineTo(thing.v.x * 5 + thing.x, thing.v.y * 5 + thing.y);
+  context.stroke(); 
+}
+
+/**
  * Modifies a color by recursively blending colors of other
  * objects that the provided Thing is colliding with based
  * on their relative mass.
@@ -72,6 +98,8 @@ const regEntry = () => {
     render: (context, thing) => {
       blendColors(thing, color);
       renderSphere(context, color, thing.x, thing.y, Math.sqrt(thing.mass));
+      // renderV(context, thing);
+      // renderG(context, thing);
     }
   }
 }

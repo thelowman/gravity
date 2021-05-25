@@ -30,6 +30,12 @@ let minMaxX;
  */
 let minMaxY;
 
+/** 
+ * Functions to cause objects to disappear off one 
+ * bound and appear on the opposite.
+ */
+let wrapX, wrapY;
+
 
 /** Holds things that will collide on the next update. */
 let collisions = [];
@@ -76,12 +82,8 @@ const update = things => {
   }
   // move objects
   for(let i = 0; i < things.length; i++) {
-    things[i].x += things[i].v.x;
-    things[i].y += things[i].v.y;
-    if (things[i].x > minMaxX) things[i].x = things[i].x + minMaxX * -2;
-    if (things[i].x < minMaxX * -1) things[i].x = things[i].x + minMaxX * 2;
-    if (things[i].y > minMaxY) things[i].y = things[i].y + minMaxY * -2;
-    if (things[i].y < minMaxY * -1) things[i].y = things[i].y + minMaxY * 2;
+    things[i].x = wrapX(things[i].x + things[i].v.x);
+    things[i].y = wrapY(things[i].y + things[i].v.y);
   }
   // calculate collisions (for the next round)
   const gForce = p.calcG(things);
@@ -140,6 +142,8 @@ onmessage = e => {
   if (e.data.params) {
     minMaxX = e.data.params.minMaxX;
     minMaxY = e.data.params.minMaxY;
+    wrapX = p.wrap(minMaxX);
+    wrapY = p.wrap(minMaxY);
     numObjects = e.data.params.numObjects;
     control = play();
   }
