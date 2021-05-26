@@ -13,8 +13,8 @@ const init = canvas => {
   const ctx = canvas.getContext('2d', { alpha: false });
 
   const { width, height } = canvas.getClientRects()[0];
-  const minMaxX = Math.floor(width * .5);
-  const minMaxY = Math.floor(height * .5);
+  const minMaxX = Math.ceil(width * .5);
+  const minMaxY = Math.ceil(height * .5);
 
   ctx.resetTransform();
   ctx.translate(minMaxX, minMaxY);

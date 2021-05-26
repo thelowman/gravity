@@ -36,7 +36,7 @@ const renderSphere = (context, c, x, y, r) => {
  * @param {Thing} thing 
  */
 const renderG = (context, thing) => {
-  context.strokeStyle = '#fff';
+  context.strokeStyle = '#88f';
   context.beginPath();
   context.moveTo(thing.x, thing.y);
   context.lineTo(thing.g.x + thing.x, thing.g.y + thing.y);
@@ -52,7 +52,7 @@ const renderV = (context, thing) => {
   context.strokeStyle = '#ff0';
   context.beginPath();
   context.moveTo(thing.x, thing.y);
-  context.lineTo(thing.v.x * 5 + thing.x, thing.v.y * 5 + thing.y);
+  context.lineTo(thing.v.x * -5 + thing.x, thing.v.y * -5 + thing.y);
   context.stroke(); 
 }
 
@@ -98,8 +98,8 @@ const regEntry = () => {
     render: (context, thing) => {
       blendColors(thing, color);
       renderSphere(context, color, thing.x, thing.y, Math.sqrt(thing.mass));
-      // renderV(context, thing);
-      // renderG(context, thing);
+      renderV(context, thing);
+      renderG(context, thing);
     }
   }
 }

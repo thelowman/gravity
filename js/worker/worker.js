@@ -86,7 +86,7 @@ const update = things => {
     things[i].y = wrapY(things[i].y + things[i].v.y);
   }
   // calculate collisions (for the next round)
-  const gForce = p.calcG(things);
+  const gForce = p.calcG(things, minMaxX, minMaxY);
   collisions = things.reduce((coll, thing) => {
     thing.g = gForce(thing);
     if (

@@ -38,8 +38,8 @@ const rtod = r => r * 180 / Math.PI;
 
 /**
  * Distance between 2 points.
- * @param {Thing} a
- * @param {Thing} b
+ * @param {Point | Thing} a
+ * @param {Point | Thing} b
  * @returns {number}
  */
 const distance = (a, b) => {
@@ -51,8 +51,8 @@ const distance = (a, b) => {
 
 /**
  * Agngle between 2 points (radians).
- * @param {Thing} a
- * @param {Thing} b
+ * @param {Point | Thing} a
+ * @param {Point | Thing} b
  * @returns {number} The angle in radians.
  */
 const angle = (a, b) => Math.atan2(b.y - a.y, b.x - a.x);
@@ -95,9 +95,20 @@ const wrap = minMax => xy =>
  * @param {Thing[]} things 
  * @returns {(Thing) => GForce} Function to calculate the G-Force on an object.
  */
-const calcG = things => a => {
+const calcG = (things, minMaxX, minMaxY) => a => {
+  // const wrapX = wrap(minMaxX);
+  // const wrapY = wrap(minMaxY);
+  // const offset = Object.assign({}, a);
+  // offset.x = 0;
+  // offset.y = 0;
   return things.reduce((g, b) => {
     if (a !== b) { // exclude itself
+      // const tmp = Object.assign({}, b);
+      // tmp.x = wrapX(tmp.x - a.x);
+      // tmp.y = wrapY(tmp.y - a.y);
+      // const dist = distance(offset, tmp);
+      // const attr = attraction(offset, tmp, dist);
+      // const pt = vToP(angle(offset, tmp), attr);
       const dist = distance(a, b);
       const attr = attraction(a, b, dist);
       const pt = vToP(angle(a, b), attr);

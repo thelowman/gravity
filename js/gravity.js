@@ -13,6 +13,14 @@ const maxObjects = Math.floor(Math.sqrt(minMaxX * minMaxY) / 2);
 /** Automatically reset when the number of objects gets below this number. */
 const minObjects = Math.floor(Math.sqrt(maxObjects));
 
+/** Send the current configuration to the console. */
+const logSettings = () => {
+  console.log('minMaxX', minMaxX);
+  console.log('minMaxY', minMaxY);
+  console.log('maxObjects', maxObjects);
+  console.log('minObjects', minObjects);
+}
+logSettings();
 
 /** The render loop. */
 const render = things => {
