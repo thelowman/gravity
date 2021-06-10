@@ -1,4 +1,11 @@
 /**
+ * Some typedefs to help keep track of things.
+ * 
+ * @typedef Settings Control parameters.
+ * @property {boolean} drawGforce Adds a vector showing the total gravity.
+ * @property {boolean} drawTails Adds a velocity vector as an item's tail.
+ * @property {boolean} showOrigin Puts a circle at 0,0.
+ * 
  * @typedef Thing Represents some mass in our little universe.
  * @property {string} id A unique ID for the item.
  * @property {number} x The x coordinate.
@@ -39,5 +46,5 @@
  * 
  * @typedef RegEntry For the renderer, contains the state of a registered object.
  * @property {Color} color The current color of the object.
- * @property {(CanvasRenderingContext2D, Thing) => void} render Render function.
+ * @property {(CanvasRenderingContext2D, Thing, Settings) => void} render Render function.
  */

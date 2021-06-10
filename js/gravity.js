@@ -6,7 +6,14 @@
 
 import canvas from './canvas.js';
 import renderer from './renderer.js';
+
 const { ctx, minMaxX, minMaxY } = canvas();
+/** @type {Settings} */
+let settings = {
+  drawGforce: false,
+  drawTails: false,
+  showOrigin: false
+}
 
 /** Sets a reasonable maximum number of rendered objects based on the canvas size. */
 const maxObjects = Math.floor(Math.sqrt(minMaxX * minMaxY) / 2);
@@ -26,13 +33,15 @@ logSettings();
 const render = things => {
   ctx.fillStyle = '#000';
   ctx.fillRect(minMaxX * -1, minMaxY * -1, minMaxX * 2, minMaxY * 2);
-  renderer.render(ctx, things);
+  renderer.render(ctx, things, settings);
 
-  // // Draw a small white circle in the center.
-  // ctx.fillStyle = '#fff';
-  // ctx.beginPath();
-  // ctx.arc(0, 0, 2, 0, Math.PI * 2, true);
-  // ctx.fill();
+  if (settings.showOrigin) {
+    // Draw a small white circle in the center.
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.arc(0, 0, 2, 0, Math.PI * 2, true);
+    ctx.fill();
+  }
 }
 
 /** Spawn a worker thread. */
@@ -49,6 +58,10 @@ worker.onmessage = e => {
 }
 /** Fire up the worker. */
 worker.postMessage({ params: { minMaxX, minMaxY, numObjects: maxObjects } });
+
+
+
+
 
 
 // The worker thread should be paused when the window isn't visible.

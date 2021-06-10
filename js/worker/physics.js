@@ -90,25 +90,15 @@ const wrap = minMax => xy =>
   Math.abs(xy) > minMax ? xy > 0 ? xy - minMax * 2 : xy + minMax * 2 : xy;
 
 
+
 /**
  * Roughly calculates the G-force on one object.
  * @param {Thing[]} things 
  * @returns {(Thing) => GForce} Function to calculate the G-Force on an object.
  */
-const calcG = (things, minMaxX, minMaxY) => a => {
-  // const wrapX = wrap(minMaxX);
-  // const wrapY = wrap(minMaxY);
-  // const offset = Object.assign({}, a);
-  // offset.x = 0;
-  // offset.y = 0;
+const calcG = (things) => a => {
   return things.reduce((g, b) => {
     if (a !== b) { // exclude itself
-      // const tmp = Object.assign({}, b);
-      // tmp.x = wrapX(tmp.x - a.x);
-      // tmp.y = wrapY(tmp.y - a.y);
-      // const dist = distance(offset, tmp);
-      // const attr = attraction(offset, tmp, dist);
-      // const pt = vToP(angle(offset, tmp), attr);
       const dist = distance(a, b);
       const attr = attraction(a, b, dist);
       const pt = vToP(angle(a, b), attr);
@@ -132,5 +122,48 @@ const calcG = (things, minMaxX, minMaxY) => a => {
     coll: null
   });
 }
- 
-export default { mass, calcG, wrap }
+
+/**
+ * Roughly calculates the G-force on one object like calcG except that gravity
+ * wraps around the edges of the canvas.
+ * @param {Thing[]} things 
+ * @param {number} minMaxX Maximum positive or negative x value.
+ * @param {number} minMaxY Maximum positive or negative y value.
+ * @returns {(Thing) => GForce} Function to calculate the G-Force on an object.
+ */
+ const calcGWrapped = (things, minMaxX, minMaxY) => a => {
+  const wrapX = wrap(minMaxX);
+  const wrapY = wrap(minMaxY);
+  const offset = Object.assign({}, a);
+  offset.x = 0;
+  offset.y = 0;
+  return things.reduce((g, b) => {
+    if (a !== b) { // exclude itself
+      const tmp = Object.assign({}, b);
+      tmp.x = wrapX(tmp.x - a.x);
+      tmp.y = wrapY(tmp.y - a.y);
+      const dist = distance(offset, tmp);
+      const attr = attraction(offset, tmp, dist);
+      const pt = vToP(angle(offset, tmp), attr);
+      g.x += pt.x;
+      g.y += pt.y;
+      if (g.nearest.thing == null || g.nearest.dist > dist) {
+        g.nearest.thing = b;
+        g.nearest.dist = dist;
+        g.nearest.attr = attr;
+      }
+    }
+    return g;
+  }, {
+    x:0,
+    y:0,
+    nearest: {
+      thing: null,
+      dist: 0,
+      attr: 0
+    },
+    coll: null
+  });
+}
+
+export default { mass, wrap, calcG, calcGWrapped }

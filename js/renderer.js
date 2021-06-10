@@ -95,11 +95,11 @@ const regEntry = () => {
   else color.b = (Math.random() * 80) + 175;
   return {
     color,
-    render: (context, thing) => {
+    render: (context, thing, settings) => {
       blendColors(thing, color);
       renderSphere(context, color, thing.x, thing.y, Math.sqrt(thing.mass));
-      renderV(context, thing);
-      renderG(context, thing);
+      if (settings.drawTails) renderV(context, thing);
+      if (settings.drawGforce) renderG(context, thing);
     }
   }
 }
@@ -117,13 +117,11 @@ let resetting = false;
 
 /**
  * Renders all Things to the canvas and removes unused registry entries.
- * @param {CanvasRenderingContext2D} context 
- * @param {Thing[]} things 
  */
-const render = (context, things) => {
+const render = (context, things, settings) => {
   let obsolete = Object.keys(registry);
   for(let i = 0; i < things.length; i++) {
-    registry[things[i].id].render(context, things[i]);
+    registry[things[i].id].render(context, things[i], settings);
     let tIndex = obsolete.indexOf(things[i].id);
     if (tIndex > -1) obsolete.splice(tIndex, 1);
   }
